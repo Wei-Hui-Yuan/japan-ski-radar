@@ -215,6 +215,18 @@ async function fetchResorts() {
   }
 }
 
+const RESORT_SHORT_LABELS = {
+  "Nozawa Onsen": "♨️ Nozawa Onsen",
+  "Hakuba Valley": "🏔️ Hakuba Valley",
+  "Madarao & Tangram": "🌲 Madarao & Tangram",
+  "Myoko Kogen": "❄️ Myoko Kogen",
+  "Echigo-Yuzawa & Naeba": "🚅 Yuzawa & Naeba",
+  "Shiga Kogen": "🗻 Shiga Kogen",
+  "Karuizawa & Sugadaira": "🛍️ Karuizawa & Sugadaira",
+  "Kusatsu & Manza Onsen": "♨️ Kusatsu & Manza",
+  "Ryuoo & Togakushi": "☁️ Ryuoo & Togakushi"
+};
+
 // Render Resort Tabs inside Modal
 function renderResortTabs() {
   if (!resortTabsContainer) return;
@@ -223,10 +235,11 @@ function renderResortTabs() {
 
   resortTabsContainer.innerHTML = keys.map((key) => {
     const r = resortsData[key];
+    const label = RESORT_SHORT_LABELS[key] || (r ? r.name.split(' (')[0] : key);
     const isActive = key === activeResortKey ? "active" : "";
     return `
-      <button class="resort-tab-btn ${isActive}" onclick="selectResortTab('${key}')">
-        ${r.name.split(' (')[0]}
+      <button type="button" class="resort-tab-btn ${isActive}" onclick="selectResortTab('${key}')">
+        ${label}
       </button>
     `;
   }).join("");
@@ -469,7 +482,11 @@ function renderResortDetail(resortKey) {
 
 function setGearTier(tier) {
   selectedGearTier = tier;
+  const currentScroll = resortDetailContent ? resortDetailContent.scrollTop : 0;
   renderResortDetail(activeResortKey);
+  if (resortDetailContent) {
+    resortDetailContent.scrollTop = currentScroll;
+  }
 }
 
 // Lodges Rendering Logic

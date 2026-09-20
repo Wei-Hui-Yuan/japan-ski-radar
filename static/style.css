@@ -43,6 +43,33 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(56, 189, 248, 0.4) rgba(15, 23, 42, 0.8);
+}
+
+/* Universal Dark Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.85);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(56, 189, 248, 0.35);
+  border-radius: 4px;
+  border: 2px solid rgba(15, 23, 42, 0.85);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(56, 189, 248, 0.65);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
 body {
@@ -862,11 +889,39 @@ body {
 }
 
 .modal-window-large {
-  max-width: 1000px;
-  width: 95vw;
-  max-height: 90vh;
+  max-width: 1040px;
+  width: 94vw;
+  height: 88vh;
+  max-height: 92vh;
   display: flex;
   flex-direction: column;
+  background: #0c1222;
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.9), 0 0 35px rgba(56, 189, 248, 0.12);
+  overflow: hidden;
+}
+
+.modal-header .btn-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  line-height: 1;
+}
+
+.modal-header .btn-icon:hover {
+  background: rgba(239, 68, 68, 0.25);
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.4);
 }
 
 .modal-title-with-badge {
@@ -893,57 +948,51 @@ body {
 
 .resort-tabs-bar {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   padding: 12px 24px;
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(15, 23, 42, 0.95);
   border-bottom: 1px solid var(--border-subtle);
-  overflow-x: auto;
-  white-space: nowrap;
-  scrollbar-width: thin;
-}
-
-.resort-tabs-bar::-webkit-scrollbar {
-  height: 4px;
-}
-
-.resort-tabs-bar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 4px;
+  flex-shrink: 0;
 }
 
 .resort-tab-btn {
-  background: rgba(30, 41, 59, 0.6);
+  background: rgba(30, 41, 59, 0.75);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
+  border-radius: 999px;
   color: var(--text-muted);
-  padding: 8px 14px;
-  font-size: 0.85rem;
+  padding: 6px 14px;
+  font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
 }
 
 .resort-tab-btn:hover {
   background: rgba(56, 189, 248, 0.15);
-  color: var(--text-main);
-  border-color: rgba(56, 189, 248, 0.3);
+  color: #ffffff;
+  border-color: rgba(56, 189, 248, 0.4);
 }
 
 .resort-tab-btn.active {
-  background: linear-gradient(135deg, rgba(14, 165, 233, 0.25) 0%, rgba(99, 102, 241, 0.25) 100%);
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.35) 0%, rgba(99, 102, 241, 0.35) 100%);
   color: #38bdf8;
   border-color: var(--accent-cyan);
-  box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
 }
 
 .modal-body-scroll {
-  padding: 24px;
+  padding: 20px 24px 32px;
   overflow-y: auto;
+  overflow-x: hidden;
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 18px;
 }
 
 /* Mountain Overview Header */
