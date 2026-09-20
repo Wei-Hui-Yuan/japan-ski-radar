@@ -7,7 +7,7 @@ import sys
 sys.stdout.reconfigure(encoding='utf-8')
 import os
 import csv
-from fastapi import FastAPI, Query, BackgroundTasks
+from fastapi import FastAPI, Query, BackgroundTasks, Request
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
@@ -93,6 +93,15 @@ class ScrapeRequest(BaseModel):
     checkout: Optional[str] = DEFAULT_CHECKOUT
     adults: Optional[int] = DEFAULT_ADULTS
     rooms: Optional[int] = DEFAULT_ROOMS
+
+@app.get("/api/debug")
+@app.get("/debug")
+def debug_endpoint(request: Request):
+    return {
+        "path": request.scope.get("path"),
+        "root_path": request.scope.get("root_path"),
+        "url": str(request.url)
+    }
 
 @app.get("/api/lodges")
 @app.get("/lodges")

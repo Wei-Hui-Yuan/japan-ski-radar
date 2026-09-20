@@ -32,3 +32,5 @@ ENV/
 # Testing & logs
 test_output.csv
 *.log
+
+.vercel
