@@ -1441,6 +1441,615 @@ body {
 }
 
 /* ==========================================================================
+   Total Trip Budget & Cost Calculator Modal
+   ========================================================================== */
+.btn-calculator {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(217, 119, 6, 0.3) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.45);
+  color: #fbbf24;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.2);
+  transition: all 0.2s ease;
+}
+
+.btn-calculator:hover {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.35) 0%, rgba(217, 119, 6, 0.45) 100%);
+  border-color: #f59e0b;
+  color: #fffbeb;
+  box-shadow: 0 0 18px rgba(245, 158, 11, 0.4);
+  transform: translateY(-1px);
+}
+
+.modal-window-calc {
+  max-width: 1100px;
+  width: 95vw;
+  height: 88vh;
+  max-height: 860px;
+}
+
+.badge-gold {
+  background: rgba(245, 158, 11, 0.18);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.calc-header-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.currency-toggle-group {
+  display: flex;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  padding: 2px;
+}
+
+.currency-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.currency-btn:hover {
+  color: #ffffff;
+}
+
+.currency-btn.active {
+  background: #38bdf8;
+  color: #0b1329;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+}
+
+.calc-body-layout {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 20px;
+  padding: 20px 24px 32px;
+}
+
+.calc-inputs-column {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.calc-section-card {
+  background: rgba(19, 29, 49, 0.7);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: border-color 0.2s;
+}
+
+.calc-section-card:hover {
+  border-color: rgba(56, 189, 248, 0.35);
+}
+
+.calc-section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  padding-bottom: 8px;
+}
+
+.calc-section-icon {
+  font-size: 1.3rem;
+}
+
+.calc-section-header h4 {
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.calc-section-sub {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.calc-select {
+  background: #0f172a;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: #ffffff;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  width: 100%;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.calc-select:focus {
+  border-color: #38bdf8;
+}
+
+.calc-mini-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.input-with-symbol {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.input-with-symbol .currency-symbol {
+  position: absolute;
+  left: 12px;
+  color: var(--text-muted);
+  font-weight: 700;
+  font-size: 0.9rem;
+  pointer-events: none;
+}
+
+.input-with-symbol input {
+  padding-left: 28px;
+  width: 100%;
+  background: #0f172a;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: #ffffff;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.input-with-symbol input:focus {
+  border-color: #38bdf8;
+}
+
+.calc-tag-display {
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  color: #38bdf8;
+  padding: 7px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  height: 38px;
+  display: flex;
+  align-items: center;
+}
+
+.calc-grid-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.calc-checkbox-row {
+  display: flex;
+  align-items: center;
+  margin-top: 2px;
+}
+
+.calc-checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+.calc-checkbox-label input[type="checkbox"] {
+  accent-color: #38bdf8;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.calc-tier-selector {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.calc-tier-btn,
+.calc-food-btn {
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.calc-tier-btn:hover,
+.calc-food-btn:hover {
+  border-color: var(--accent-cyan);
+  background: rgba(30, 41, 59, 0.85);
+}
+
+.calc-tier-btn.active,
+.calc-food-btn.active {
+  border-color: #38bdf8;
+  background: rgba(56, 189, 248, 0.15);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+}
+
+.tier-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.tier-price {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #38bdf8;
+  margin-top: 2px;
+}
+
+.tier-desc {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  display: block;
+  margin-top: 2px;
+}
+
+.calc-transport-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.calc-transport-pill {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.calc-transport-pill:hover {
+  border-color: #38bdf8;
+}
+
+.calc-transport-pill.active {
+  background: rgba(56, 189, 248, 0.12);
+  border-color: #38bdf8;
+}
+
+.calc-transport-pill input[type="radio"] {
+  accent-color: #38bdf8;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.calc-transport-pill div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.calc-transport-pill div strong {
+  font-size: 0.82rem;
+  color: #ffffff;
+}
+
+.calc-transport-pill div span {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* Right Column: Executive Cost Receipt */
+.calc-receipt-column {
+  position: sticky;
+  top: 0;
+  align-self: start;
+}
+
+.calc-receipt-card {
+  background: linear-gradient(145deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.receipt-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.receipt-title {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.receipt-dates {
+  font-size: 0.75rem;
+  color: var(--accent-cyan);
+  font-weight: 600;
+}
+
+.receipt-highlight-box {
+  display: flex;
+  background: rgba(11, 19, 43, 0.8);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  align-items: center;
+}
+
+.receipt-total-pax,
+.receipt-total-group {
+  flex: 1;
+  text-align: center;
+}
+
+.receipt-total-pax .label,
+.receipt-total-group .label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-dim);
+  font-weight: 700;
+  display: block;
+}
+
+.amount-pax {
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: #38bdf8;
+  margin: 4px 0 2px;
+}
+
+.amount-group {
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 4px 0 2px;
+}
+
+.sub-pax,
+.sub-group {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  display: block;
+}
+
+.receipt-divider-vert {
+  width: 1px;
+  background: var(--border-subtle);
+  height: 48px;
+  margin: 0 10px;
+}
+
+.receipt-bar-section .bar-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.cost-bar-segmented {
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  display: flex;
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cost-seg {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.seg-lodge {
+  background: #3b82f6;
+}
+
+.seg-lift {
+  background: #06b6d4;
+}
+
+.seg-rental {
+  background: #8b5cf6;
+}
+
+.seg-trans {
+  background: #f59e0b;
+}
+
+.seg-food {
+  background: #10b981;
+}
+
+.receipt-table {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.receipt-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  background: rgba(30, 41, 59, 0.45);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.receipt-row .row-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.receipt-row .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.receipt-row .dot-lodge {
+  background: #3b82f6;
+}
+
+.receipt-row .dot-lift {
+  background: #06b6d4;
+}
+
+.receipt-row .dot-rental {
+  background: #8b5cf6;
+}
+
+.receipt-row .dot-trans {
+  background: #f59e0b;
+}
+
+.receipt-row .dot-food {
+  background: #10b981;
+}
+
+.receipt-row strong {
+  font-size: 0.8rem;
+  color: #ffffff;
+  display: block;
+}
+
+.receipt-row .row-sub {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  display: block;
+}
+
+.receipt-row .row-nums {
+  text-align: right;
+}
+
+.receipt-row .num-group {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #ffffff;
+  display: block;
+}
+
+.receipt-row .num-pax {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  display: block;
+}
+
+.receipt-actions {
+  margin-top: 4px;
+}
+
+.btn-whatsapp {
+  width: 100%;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  font-weight: 700;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+.btn-whatsapp:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
+  filter: brightness(1.08);
+}
+
+.receipt-notes {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  text-align: center;
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+.btn-calc-lodge {
+  width: 100%;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #fbbf24;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+  padding: 7px 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.btn-calc-lodge:hover {
+  background: rgba(245, 158, 11, 0.25);
+  border-color: #f59e0b;
+  color: #fef3c7;
+}
+
+/* ==========================================================================
    Responsive Adaptations
    ========================================================================== */
 @media (max-width: 900px) {
@@ -1455,6 +2064,16 @@ body {
     display: none;
   }
   .lodges-grid {
+    grid-template-columns: 1fr;
+  }
+  .calc-body-layout {
+    grid-template-columns: 1fr;
+  }
+  .modal-window-calc {
+    width: 98vw;
+    height: 94vh;
+  }
+  .calc-tier-selector {
     grid-template-columns: 1fr;
   }
 }

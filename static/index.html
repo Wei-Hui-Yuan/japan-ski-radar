@@ -35,6 +35,17 @@
           <span>🎿 Mountain Lifts & Rentals</span>
         </button>
 
+        <button id="btn-open-trip-calc" class="btn btn-calculator">
+          <span class="btn-glow-gold"></span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+            <rect x="4" y="2" width="16" height="20" rx="2"/>
+            <line x1="8" y1="6" x2="16" y2="6"/>
+            <line x1="16" y1="14" x2="16" y2="18"/>
+            <path d="M8 10h.01M12 10h.01M16 10h.01M8 14h.01M12 14h.01M8 18h.01M12 18h.01"/>
+          </svg>
+          <span>💰 Total Cost Calculator</span>
+        </button>
+
         <button id="btn-export-csv" class="btn btn-secondary">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -258,6 +269,341 @@
         <!-- Resort Dynamic Details Container -->
         <div class="modal-body-scroll" id="resort-detail-content">
           <!-- Injected dynamically by app.js -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Total Trip Budget & Cost Calculator Modal -->
+    <div id="modal-calculator" class="modal-backdrop hidden">
+      <div class="modal-window modal-window-calc">
+        <div class="modal-header">
+          <div>
+            <div class="modal-title-with-badge">
+              <h2>💰 Total Trip Cost & Budget Calculator</h2>
+              <span class="badge-gold">5 Adults • Dec 29 – Jan 2</span>
+            </div>
+            <p class="modal-subtitle">Comprehensive financial breakdown uniting Lodging, Lifts, Gear, Tokyo Transport, and Dining</p>
+          </div>
+          <div class="calc-header-controls">
+            <div class="currency-toggle-group">
+              <button type="button" class="currency-btn active" data-currency="JPY">¥ JPY</button>
+              <button type="button" class="currency-btn" data-currency="USD">$ USD</button>
+              <button type="button" class="currency-btn" data-currency="SGD">S$ SGD</button>
+            </div>
+            <button id="btn-close-calc-modal" class="btn-icon">&times;</button>
+          </div>
+        </div>
+
+        <div class="modal-body-scroll calc-body-layout">
+          <!-- Left Column: Interactive Parameters -->
+          <div class="calc-inputs-column">
+            
+            <!-- 1. Accommodation Selection -->
+            <div class="calc-section-card">
+              <div class="calc-section-header">
+                <span class="calc-section-icon">🏨</span>
+                <div>
+                  <h4>1. Accommodation (4 Nights)</h4>
+                  <span class="calc-section-sub">Select from radar lodges or enter custom rate</span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="calc-lodge-select">Select Lodge / Ryokan:</label>
+                <select id="calc-lodge-select" class="calc-select">
+                  <!-- Populated dynamically with 68 lodges -->
+                </select>
+              </div>
+              <div class="calc-mini-row">
+                <div class="form-group flex-1">
+                  <label for="calc-lodge-cost">Lodging Total (All 5 Guests • 4 Nights):</label>
+                  <div class="input-with-symbol">
+                    <span class="currency-symbol">¥</span>
+                    <input type="number" id="calc-lodge-cost" value="167670" step="1000">
+                  </div>
+                </div>
+                <div class="calc-tag-display" id="calc-lodge-rate-tag">
+                  ~¥8,380 / person / night
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. Mountain Lift Passes -->
+            <div class="calc-section-card">
+              <div class="calc-section-header">
+                <span class="calc-section-icon">🚡</span>
+                <div>
+                  <h4>2. Ski Lift Passes</h4>
+                  <span class="calc-section-sub" id="calc-resort-name-sub">Synced with Nozawa Onsen</span>
+                </div>
+              </div>
+              <div class="calc-grid-2col">
+                <div class="form-group">
+                  <label for="calc-lift-days">Days of Skiing / Snowboarding:</label>
+                  <select id="calc-lift-days" class="calc-select">
+                    <option value="4" selected>4 Full Days (Recommended Holiday Pass)</option>
+                    <option value="3">3 Days</option>
+                    <option value="2">2 Days</option>
+                    <option value="1">1 Day</option>
+                    <option value="0">0 Days (Sightseeing only)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="calc-skiers-count">Number of Skiers in Party:</label>
+                  <select id="calc-skiers-count" class="calc-select">
+                    <option value="5" selected>All 5 Friends</option>
+                    <option value="4">4 Friends</option>
+                    <option value="3">3 Friends</option>
+                    <option value="2">2 Friends</option>
+                    <option value="1">1 Friend</option>
+                  </select>
+                </div>
+              </div>
+              <div class="calc-checkbox-row">
+                <label class="calc-checkbox-label">
+                  <input type="checkbox" id="calc-night-ski-toggle">
+                  <span>Add Night Skiing (1 session, ~¥2,500/skier)</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- 3. Ski & Snowboard Rentals -->
+            <div class="calc-section-card">
+              <div class="calc-section-header">
+                <span class="calc-section-icon">🎿</span>
+                <div>
+                  <h4>3. Gear & Equipment Rentals</h4>
+                  <span class="calc-section-sub">Skis, snowboards, boots & outerwear</span>
+                </div>
+              </div>
+              <div class="calc-tier-selector">
+                <div class="calc-tier-btn active" data-gear-tier="standard">
+                  <div class="tier-title">Standard Carving Set</div>
+                  <div class="tier-price" id="calc-gear-tier-std-rate">~¥5,000 / day</div>
+                </div>
+                <div class="calc-tier-btn" data-gear-tier="powder">
+                  <div class="tier-title">Powder Demo Fleet</div>
+                  <div class="tier-price" id="calc-gear-tier-pow-rate">~¥7,000 / day</div>
+                </div>
+                <div class="calc-tier-btn" data-gear-tier="none">
+                  <div class="tier-title">Bring Own Gear</div>
+                  <div class="tier-price">¥0 / day</div>
+                </div>
+              </div>
+              <div class="calc-grid-2col" style="margin-top:10px;">
+                <div class="form-group">
+                  <label for="calc-gear-pax">Friends Needing Gear:</label>
+                  <select id="calc-gear-pax" class="calc-select">
+                    <option value="5" selected>5 Friends</option>
+                    <option value="4">4 Friends</option>
+                    <option value="3">3 Friends</option>
+                    <option value="2">2 Friends</option>
+                    <option value="1">1 Friend</option>
+                    <option value="0">0 (Everyone brings own)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="calc-wear-pax">Add Outerwear (Jacket & Pants):</label>
+                  <select id="calc-wear-pax" class="calc-select">
+                    <option value="0" selected>0 (Bring own jackets)</option>
+                    <option value="5">All 5 Friends (~¥3,500/d)</option>
+                    <option value="4">4 Friends</option>
+                    <option value="3">3 Friends</option>
+                    <option value="2">2 Friends</option>
+                    <option value="1">1 Friend</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4. Tokyo ⇄ Alps Transportation -->
+            <div class="calc-section-card">
+              <div class="calc-section-header">
+                <span class="calc-section-icon">🚅</span>
+                <div>
+                  <h4>4. Tokyo Roundtrip Transportation</h4>
+                  <span class="calc-section-sub">Getting from Tokyo to the mountains & back</span>
+                </div>
+              </div>
+              <div class="calc-transport-options">
+                <label class="calc-transport-pill active">
+                  <input type="radio" name="calc-transport" value="van" checked>
+                  <div>
+                    <strong>🚐 5-Pax 4WD Van + Tolls & Fuel</strong>
+                    <span>¥75,000 total (~¥15,000 / person roundtrip)</span>
+                  </div>
+                </label>
+                <label class="calc-transport-pill">
+                  <input type="radio" name="calc-transport" value="shinkansen">
+                  <div>
+                    <strong>🚅 Shinkansen Bullet Train</strong>
+                    <span>¥85,000 total (~¥17,000 / person roundtrip)</span>
+                  </div>
+                </label>
+                <label class="calc-transport-pill">
+                  <input type="radio" name="calc-transport" value="bus">
+                  <div>
+                    <strong>🚌 Direct Ski Highway Express Bus</strong>
+                    <span>¥50,000 total (~¥10,000 / person roundtrip)</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- 5. Dining & Village Onsen Budget -->
+            <div class="calc-section-card">
+              <div class="calc-section-header">
+                <span class="calc-section-icon">🍱</span>
+                <div>
+                  <h4>5. Food, Drinks & Village Onsens</h4>
+                  <span class="calc-section-sub">4 days of breakfasts, lunches & izakaya dinners</span>
+                </div>
+              </div>
+              <div class="calc-tier-selector">
+                <div class="calc-food-btn" data-food-tier="budget">
+                  <div class="tier-title">Budget / Casual</div>
+                  <div class="tier-price">¥3,500 / d / pax</div>
+                  <span class="tier-desc">Ramen, curry & snacks</span>
+                </div>
+                <div class="calc-food-btn active" data-food-tier="izakaya">
+                  <div class="tier-title">Standard Izakaya</div>
+                  <div class="tier-price">¥6,500 / d / pax</div>
+                  <span class="tier-desc">Sake, yakitori & draft beers</span>
+                </div>
+                <div class="calc-food-btn" data-food-tier="gourmet">
+                  <div class="tier-title">Gourmet Feast</div>
+                  <div class="tier-price">¥12,000 / d / pax</div>
+                  <span class="tier-desc">Shinshu wagyu & hot pot</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Right Column: Live Executive Cost Receipt -->
+          <div class="calc-receipt-column">
+            <div class="calc-receipt-card">
+              <div class="receipt-header">
+                <span class="receipt-title">Trip Investment Receipt</span>
+                <span class="receipt-dates">Dec 29 – Jan 2 (4 Nights • 5 Pax)</span>
+              </div>
+
+              <!-- Main Totals Callout -->
+              <div class="receipt-highlight-box">
+                <div class="receipt-total-pax">
+                  <span class="label">PER PERSON ESTIMATE</span>
+                  <div class="amount-pax" id="receipt-per-person">¥74,234</div>
+                  <span class="sub-pax" id="receipt-per-person-alt">~$495 USD</span>
+                </div>
+                <div class="receipt-divider-vert"></div>
+                <div class="receipt-total-group">
+                  <span class="label">TOTAL GROUP (5 ADULTS)</span>
+                  <div class="amount-group" id="receipt-group-total">¥371,170</div>
+                  <span class="sub-group" id="receipt-group-total-alt">~$2,474 USD Total</span>
+                </div>
+              </div>
+
+              <!-- Segmented Category Distribution Bar -->
+              <div class="receipt-bar-section">
+                <div class="bar-labels">
+                  <span>Expense Distribution</span>
+                  <span id="receipt-breakdown-summary">Lodging 45% • Lifts 25%</span>
+                </div>
+                <div class="cost-bar-segmented">
+                  <div class="cost-seg seg-lodge" id="bar-seg-lodge" style="width: 45%;" title="Lodging"></div>
+                  <div class="cost-seg seg-lift" id="bar-seg-lift" style="width: 25%;" title="Lift Passes"></div>
+                  <div class="cost-seg seg-rental" id="bar-seg-rental" style="width: 15%;" title="Gear Rentals"></div>
+                  <div class="cost-seg seg-trans" id="bar-seg-trans" style="width: 10%;" title="Transport"></div>
+                  <div class="cost-seg seg-food" id="bar-seg-food" style="width: 5%;" title="Food & Onsen"></div>
+                </div>
+              </div>
+
+              <!-- Line Items Table -->
+              <div class="receipt-table">
+                <div class="receipt-row">
+                  <div class="row-info">
+                    <span class="dot dot-lodge"></span>
+                    <div>
+                      <strong id="receipt-item-lodge-title">🏨 Accommodation (4 Nights)</strong>
+                      <span class="row-sub" id="receipt-item-lodge-sub">Ryokan Azumaya (5 Guests)</span>
+                    </div>
+                  </div>
+                  <div class="row-nums">
+                    <span class="num-group" id="receipt-lodge-group">¥167,670</span>
+                    <span class="num-pax" id="receipt-lodge-pax">¥33,534 /pax</span>
+                  </div>
+                </div>
+
+                <div class="receipt-row">
+                  <div class="row-info">
+                    <span class="dot dot-lift"></span>
+                    <div>
+                      <strong>🚡 Mountain Lift Passes</strong>
+                      <span class="row-sub" id="receipt-item-lift-sub">4-Day Pass (5 Skiers)</span>
+                    </div>
+                  </div>
+                  <div class="row-nums">
+                    <span class="num-group" id="receipt-lift-group">¥130,000</span>
+                    <span class="num-pax" id="receipt-lift-pax">¥26,000 /pax</span>
+                  </div>
+                </div>
+
+                <div class="receipt-row">
+                  <div class="row-info">
+                    <span class="dot dot-rental"></span>
+                    <div>
+                      <strong>🎿 Ski & Snowboard Rentals</strong>
+                      <span class="row-sub" id="receipt-item-rental-sub">Standard Set (5 Pax • 4 Days)</span>
+                    </div>
+                  </div>
+                  <div class="row-nums">
+                    <span class="num-group" id="receipt-rental-group">¥100,000</span>
+                    <span class="num-pax" id="receipt-rental-pax">¥20,000 /pax</span>
+                  </div>
+                </div>
+
+                <div class="receipt-row">
+                  <div class="row-info">
+                    <span class="dot dot-trans"></span>
+                    <div>
+                      <strong>🚅 Tokyo ⇄ Alps Transport</strong>
+                      <span class="row-sub" id="receipt-item-trans-sub">5-Pax 4WD Rental Van + Tolls</span>
+                    </div>
+                  </div>
+                  <div class="row-nums">
+                    <span class="num-group" id="receipt-trans-group">¥75,000</span>
+                    <span class="num-pax" id="receipt-trans-pax">¥15,000 /pax</span>
+                  </div>
+                </div>
+
+                <div class="receipt-row">
+                  <div class="row-info">
+                    <span class="dot dot-food"></span>
+                    <div>
+                      <strong>🍱 Food, Drinks & Onsen</strong>
+                      <span class="row-sub" id="receipt-item-food-sub">Izakaya Tier (¥6,500/d × 4d × 5p)</span>
+                    </div>
+                  </div>
+                  <div class="row-nums">
+                    <span class="num-group" id="receipt-food-group">¥130,000</span>
+                    <span class="num-pax" id="receipt-food-pax">¥26,000 /pax</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Sharing / Copy Actions -->
+              <div class="receipt-actions">
+                <button type="button" id="btn-copy-chat-summary" class="btn btn-whatsapp">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                    <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+                    <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+                  </svg>
+                  <span id="copy-btn-text">📋 Copy Breakdown for WhatsApp / Telegram</span>
+                </button>
+                <span class="copy-note">Ready to paste directly into your group chat with full per-person math!</span>
+              </div>
+
+            </div>
+          </div>
         </div>
       </div>
     </div>

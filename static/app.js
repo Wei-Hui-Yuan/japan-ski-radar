@@ -41,6 +41,11 @@ const btnCloseResortsModal = document.getElementById("btn-close-resorts-modal");
 const resortTabsContainer = document.getElementById("resort-tabs-container");
 const resortDetailContent = document.getElementById("resort-detail-content");
 
+// Total Trip Cost Calculator Elements
+const modalCalculator = document.getElementById("modal-calculator");
+const btnOpenTripCalc = document.getElementById("btn-open-trip-calc");
+const btnCloseCalcModal = document.getElementById("btn-close-calc-modal");
+
 // Stats Elements
 const statTotal = document.getElementById("stat-total");
 const statAvailable = document.getElementById("stat-available");
@@ -55,6 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
   fetchLodges();
   fetchResorts();
   setupEventListeners();
+  setupCalculatorEventListeners();
 });
 
 function setupEventListeners() {
@@ -193,6 +199,7 @@ async function fetchLodges() {
     const json = await res.json();
     allLodges = json.data || [];
     renderLodges();
+    populateCalcLodgeSelect();
   } catch (err) {
     console.error("Error fetching lodges:", err);
     lodgesGrid.innerHTML = `
@@ -642,6 +649,9 @@ function createLodgeCardHtml(lodge) {
         <a href="${lodge.direct_link}" target="_blank" rel="noopener noreferrer" class="btn btn-book">
           Open Booking Page ↗
         </a>
+        <button type="button" class="btn-calc-lodge" onclick="openTripCalculator('${escapeJs(lodge.id)}')">
+          💰 Calculate Trip Total
+        </button>
       </div>
     </article>
   `;
@@ -685,3 +695,533 @@ async function triggerScrape() {
     scrapeIcon.classList.remove("spinning");
   }
 }
+
+/* ==========================================================================
+   Total Trip Budget & Cost Calculator Engine (5 Guests • 4 Nights)
+   ========================================================================== */
+
+let calcCurrency = "JPY"; // "JPY", "USD", "SGD"
+let calcGearTier = "standard"; // "standard", "powder", "none"
+let calcFoodTier = "izakaya"; // "budget", "izakaya", "gourmet"
+let calcTransportMode = "van"; // "van", "shinkansen", "bus"
+let cachedTripTotals = {
+  lodgeCost: 167670,
+  lodgePerPax: 33534,
+  liftCost: 130000,
+  liftPerPax: 26000,
+  gearCost: 100000,
+  gearPerPax: 20000,
+  transCost: 75000,
+  transPerPax: 15000,
+  foodCost: 130000,
+  foodPerPax: 26000,
+  groupTotal: 602670,
+  totalPax: 120534,
+  transLabel: "5-Pax 4WD Van + Tolls & Fuel",
+  foodLabel: "Standard Izakaya (¥6,500/d)"
+};
+
+// Rates Constants
+const CONVERSION_RATES = {
+  JPY: 1,
+  USD: 1 / 150,
+  SGD: 1 / 112
+};
+
+function formatCurrency(amountJpy, targetCurrency = calcCurrency) {
+  if (targetCurrency === "USD") {
+    const usd = Math.round(amountJpy * CONVERSION_RATES.USD);
+    return `$${usd.toLocaleString()}`;
+  } else if (targetCurrency === "SGD") {
+    const sgd = Math.round(amountJpy * CONVERSION_RATES.SGD);
+    return `S$${sgd.toLocaleString()}`;
+  }
+  return `¥${Math.round(amountJpy).toLocaleString()}`;
+}
+
+function setupCalculatorEventListeners() {
+  if (btnOpenTripCalc) {
+    btnOpenTripCalc.addEventListener("click", () => openTripCalculator());
+  }
+
+  if (btnCloseCalcModal) {
+    btnCloseCalcModal.addEventListener("click", closeTripCalculator);
+  }
+
+  if (modalCalculator) {
+    modalCalculator.addEventListener("click", (e) => {
+      if (e.target === modalCalculator) {
+        closeTripCalculator();
+      }
+    });
+  }
+
+  // Currency switcher
+  const currencyBtns = document.querySelectorAll(".currency-btn");
+  currencyBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      currencyBtns.forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      calcCurrency = btn.dataset.currency || "JPY";
+      calculateTotalTripCost();
+    });
+  });
+
+  // Lodge select
+  const calcLodgeSelect = document.getElementById("calc-lodge-select");
+  if (calcLodgeSelect) {
+    calcLodgeSelect.addEventListener("change", onCalcLodgeChange);
+  }
+
+  // Lodge cost manual input
+  const calcLodgeCost = document.getElementById("calc-lodge-cost");
+  if (calcLodgeCost) {
+    calcLodgeCost.addEventListener("input", () => calculateTotalTripCost());
+  }
+
+  // Lift Days & Skiers count
+  const calcLiftDays = document.getElementById("calc-lift-days");
+  const calcSkiersCount = document.getElementById("calc-skiers-count");
+  const calcNightSkiToggle = document.getElementById("calc-night-ski-toggle");
+
+  if (calcLiftDays) calcLiftDays.addEventListener("change", () => calculateTotalTripCost());
+  if (calcSkiersCount) calcSkiersCount.addEventListener("change", () => calculateTotalTripCost());
+  if (calcNightSkiToggle) calcNightSkiToggle.addEventListener("change", () => calculateTotalTripCost());
+
+  // Gear Tier Buttons
+  const calcTierBtns = document.querySelectorAll(".calc-tier-btn");
+  calcTierBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      calcTierBtns.forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      calcGearTier = btn.dataset.gearTier || "standard";
+      calculateTotalTripCost();
+    });
+  });
+
+  // Gear & Wear Pax Selects
+  const calcGearPax = document.getElementById("calc-gear-pax");
+  const calcWearPax = document.getElementById("calc-wear-pax");
+  if (calcGearPax) calcGearPax.addEventListener("change", () => calculateTotalTripCost());
+  if (calcWearPax) calcWearPax.addEventListener("change", () => calculateTotalTripCost());
+
+  // Transport Radio options
+  const transportPills = document.querySelectorAll(".calc-transport-pill");
+  const transportRadios = document.querySelectorAll('input[name="calc-transport"]');
+  transportRadios.forEach((radio) => {
+    radio.addEventListener("change", (e) => {
+      calcTransportMode = e.target.value;
+      transportPills.forEach((p) => {
+        const input = p.querySelector('input[type="radio"]');
+        p.classList.toggle("active", input && input.checked);
+      });
+      calculateTotalTripCost();
+    });
+  });
+
+  // Food Tier Buttons
+  const calcFoodBtns = document.querySelectorAll(".calc-food-btn");
+  calcFoodBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      calcFoodBtns.forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      calcFoodTier = btn.dataset.foodTier || "izakaya";
+      calculateTotalTripCost();
+    });
+  });
+
+  // WhatsApp / Clipboard summary button
+  const btnCopyChatSummary = document.getElementById("btn-copy-chat-summary");
+  if (btnCopyChatSummary) {
+    btnCopyChatSummary.addEventListener("click", copyChatSummary);
+  }
+}
+
+function populateCalcLodgeSelect() {
+  const calcLodgeSelect = document.getElementById("calc-lodge-select");
+  if (!calcLodgeSelect) return;
+
+  if (allLodges.length === 0) return;
+
+  const currentVal = calcLodgeSelect.value;
+  let optionsHtml = `<option value="custom">-- Custom Accommodation Rate (Custom ¥) --</option>`;
+
+  optionsHtml += allLodges.map((lodge) => {
+    const priceText = lodge.price_display || "Contact";
+    return `<option value="${lodge.id}">${lodge.resort}: ${lodge.name} (${lodge.name_en || ''}) - ${priceText}</option>`;
+  }).join("");
+
+  calcLodgeSelect.innerHTML = optionsHtml;
+
+  if (currentVal && calcLodgeSelect.querySelector(`option[value="${currentVal}"]`)) {
+    calcLodgeSelect.value = currentVal;
+  } else {
+    // Default to the first lodge with confirmed pricing (or Ryokan Azumaya)
+    const preferred = allLodges.find((l) => l.price_per_person_night && parseInt(l.price_per_person_night, 10) > 0) || allLodges[0];
+    if (preferred) {
+      calcLodgeSelect.value = preferred.id;
+      applyLodgeToCalculator(preferred);
+    }
+  }
+
+  calculateTotalTripCost();
+}
+
+function onCalcLodgeChange(e) {
+  const selectedId = e.target.value;
+  if (selectedId === "custom") {
+    const calcResortSub = document.getElementById("calc-resort-name-sub");
+    if (calcResortSub) calcResortSub.textContent = "Custom Mountain Rates";
+    calculateTotalTripCost();
+    return;
+  }
+
+  const lodge = allLodges.find((l) => l.id === selectedId);
+  if (lodge) {
+    applyLodgeToCalculator(lodge);
+  }
+  calculateTotalTripCost();
+}
+
+function applyLodgeToCalculator(lodge) {
+  const calcLodgeCost = document.getElementById("calc-lodge-cost");
+  const calcResortSub = document.getElementById("calc-resort-name-sub");
+
+  if (!lodge) return;
+
+  let totalEst = 167670;
+  if (lodge.price_per_person_night && parseInt(lodge.price_per_person_night, 10) > 0) {
+    // 5 persons * 4 nights
+    totalEst = parseInt(lodge.price_per_person_night, 10) * 5 * 4;
+  } else if (lodge.group_total_est) {
+    const parsed = parseInt(lodge.group_total_est.replace(/[^0-9]/g, ""), 10);
+    if (!isNaN(parsed) && parsed > 0) totalEst = parsed;
+  }
+
+  if (calcLodgeCost) {
+    calcLodgeCost.value = totalEst;
+  }
+
+  if (calcResortSub) {
+    calcResortSub.textContent = `Synced with ${lodge.resort}`;
+  }
+}
+
+function openTripCalculator(lodgeId = null) {
+  if (allLodges.length > 0) {
+    populateCalcLodgeSelect();
+  }
+
+  const calcLodgeSelect = document.getElementById("calc-lodge-select");
+
+  if (lodgeId) {
+    const targetLodge = allLodges.find((l) => l.id === lodgeId);
+    if (targetLodge && calcLodgeSelect) {
+      calcLodgeSelect.value = targetLodge.id;
+      applyLodgeToCalculator(targetLodge);
+    }
+  }
+
+  calculateTotalTripCost();
+
+  if (modalCalculator) {
+    modalCalculator.classList.remove("hidden");
+  }
+}
+
+function closeTripCalculator() {
+  if (modalCalculator) {
+    modalCalculator.classList.add("hidden");
+  }
+}
+
+function calculateTotalTripCost() {
+  const calcLodgeSelect = document.getElementById("calc-lodge-select");
+  const calcLodgeCost = document.getElementById("calc-lodge-cost");
+  const calcLodgeRateTag = document.getElementById("calc-lodge-rate-tag");
+
+  const calcLiftDays = document.getElementById("calc-lift-days");
+  const calcSkiersCount = document.getElementById("calc-skiers-count");
+  const calcNightSkiToggle = document.getElementById("calc-night-ski-toggle");
+
+  const calcGearPax = document.getElementById("calc-gear-pax");
+  const calcWearPax = document.getElementById("calc-wear-pax");
+
+  // 1. Accommodation
+  const lodgeTotal = parseInt(calcLodgeCost?.value, 10) || 0;
+  const perPersonPerNight = Math.round(lodgeTotal / 5 / 4);
+  if (calcLodgeRateTag) {
+    calcLodgeRateTag.textContent = `~¥${perPersonPerNight.toLocaleString()} / person / night`;
+  }
+
+  const selectedLodgeId = calcLodgeSelect ? calcLodgeSelect.value : "";
+  const selectedLodge = allLodges.find((l) => l.id === selectedLodgeId);
+  const lodgeName = selectedLodge ? selectedLodge.name : (selectedLodgeId === "custom" ? "Custom Ryokan" : "Selected Accommodation");
+
+  // 2. Mountain Lift Passes
+  const liftDays = parseInt(calcLiftDays?.value, 10) ?? 4;
+  const skiers = parseInt(calcSkiersCount?.value, 10) ?? 5;
+  const hasNightSki = calcNightSkiToggle ? calcNightSkiToggle.checked : false;
+
+  // Resolve Resort Lift Pass Base Rate
+  let fourDayPassVal = 26000;
+  let oneDayPassVal = 7300;
+  if (selectedLodge && resortsData) {
+    const matchKey = Object.keys(resortsData).find((k) =>
+      selectedLodge.resort.toLowerCase().includes(k.toLowerCase()) ||
+      k.toLowerCase().includes(selectedLodge.resort.toLowerCase())
+    );
+    if (matchKey && resortsData[matchKey].lift_passes) {
+      const lp = resortsData[matchKey].lift_passes;
+      if (lp.four_day_val) fourDayPassVal = lp.four_day_val;
+      if (lp.one_day_val) oneDayPassVal = lp.one_day_val;
+    }
+  }
+
+  let passPerSkier = 0;
+  if (liftDays === 4) {
+    passPerSkier = fourDayPassVal;
+  } else if (liftDays === 3) {
+    passPerSkier = Math.round(fourDayPassVal * 0.77);
+  } else if (liftDays === 2) {
+    passPerSkier = Math.round(oneDayPassVal * 1.85);
+  } else if (liftDays === 1) {
+    passPerSkier = oneDayPassVal;
+  } else {
+    passPerSkier = 0;
+  }
+
+  const nightSkiCost = hasNightSki ? 2500 * skiers : 0;
+  const liftTotal = (passPerSkier * skiers) + nightSkiCost;
+
+  // 3. Gear & Outerwear Rentals
+  let gearDailyRate = 5000;
+  let gearTierLabel = "Standard Carving Set";
+  if (calcGearTier === "powder") {
+    gearDailyRate = 7000;
+    gearTierLabel = "Powder Demo Fleet";
+  } else if (calcGearTier === "none") {
+    gearDailyRate = 0;
+    gearTierLabel = "Bring Own Gear";
+  }
+
+  const gearPax = parseInt(calcGearPax?.value, 10) ?? 5;
+  const wearPax = parseInt(calcWearPax?.value, 10) ?? 0;
+  const wearDailyRate = 3500;
+
+  const rentalTotal = (gearDailyRate * liftDays * gearPax) + (wearDailyRate * liftDays * wearPax);
+
+  // 4. Tokyo Roundtrip Transportation
+  let transTotal = 75000;
+  let transLabel = "🚐 5-Pax 4WD Van + Tolls & Fuel";
+  if (calcTransportMode === "shinkansen") {
+    transTotal = 85000; // ~17,000 * 5
+    transLabel = "🚅 Shinkansen Bullet Train (5 Pax)";
+  } else if (calcTransportMode === "bus") {
+    transTotal = 50000; // ~10,000 * 5
+    transLabel = "🚌 Direct Ski Highway Bus (5 Pax)";
+  }
+
+  // 5. Dining, Food & Village Onsens (4 Days x 5 Pax)
+  let foodDailyRatePerPerson = 6500;
+  let foodLabel = "Standard Izakaya (¥6,500/d)";
+  if (calcFoodTier === "budget") {
+    foodDailyRatePerPerson = 3500;
+    foodLabel = "Budget / Casual (¥3,500/d)";
+  } else if (calcFoodTier === "gourmet") {
+    foodDailyRatePerPerson = 12000;
+    foodLabel = "Gourmet Feast (¥12,000/d)";
+  }
+
+  const foodTotal = foodDailyRatePerPerson * 4 * 5;
+
+  // Grand Totals
+  const groupTotal = lodgeTotal + liftTotal + rentalTotal + transTotal + foodTotal;
+  const perPersonTotal = Math.round(groupTotal / 5);
+
+  cachedTripTotals = {
+    lodgeCost: lodgeTotal,
+    lodgePerPax: Math.round(lodgeTotal / 5),
+    liftCost: liftTotal,
+    liftPerPax: Math.round(liftTotal / 5),
+    gearCost: rentalTotal,
+    gearPerPax: Math.round(rentalTotal / 5),
+    transCost: transTotal,
+    transPerPax: Math.round(transTotal / 5),
+    foodCost: foodTotal,
+    foodPerPax: Math.round(foodTotal / 5),
+    groupTotal: groupTotal,
+    totalPax: perPersonTotal,
+    transLabel: transLabel,
+    foodLabel: foodLabel
+  };
+
+  // Update Main Receipt Callouts
+  const receiptPerPerson = document.getElementById("receipt-per-person");
+  const receiptPerPersonAlt = document.getElementById("receipt-per-person-alt");
+  const receiptGroupTotal = document.getElementById("receipt-group-total");
+  const receiptGroupTotalAlt = document.getElementById("receipt-group-total-alt");
+
+  if (receiptPerPerson) receiptPerPerson.textContent = formatCurrency(perPersonTotal, calcCurrency);
+  if (receiptGroupTotal) receiptGroupTotal.textContent = formatCurrency(groupTotal, calcCurrency);
+
+  // Secondary Currency Callouts
+  if (calcCurrency === "JPY") {
+    if (receiptPerPersonAlt) receiptPerPersonAlt.textContent = `~${formatCurrency(perPersonTotal, "USD")} USD`;
+    if (receiptGroupTotalAlt) receiptGroupTotalAlt.textContent = `~${formatCurrency(groupTotal, "USD")} USD Total`;
+  } else if (calcCurrency === "USD") {
+    if (receiptPerPersonAlt) receiptPerPersonAlt.textContent = `~${formatCurrency(perPersonTotal, "JPY")} JPY`;
+    if (receiptGroupTotalAlt) receiptGroupTotalAlt.textContent = `~${formatCurrency(groupTotal, "JPY")} JPY Total`;
+  } else {
+    // SGD
+    if (receiptPerPersonAlt) receiptPerPersonAlt.textContent = `~${formatCurrency(perPersonTotal, "JPY")} JPY`;
+    if (receiptGroupTotalAlt) receiptGroupTotalAlt.textContent = `~${formatCurrency(groupTotal, "JPY")} JPY Total`;
+  }
+
+  // Update Expense Distribution Bar
+  const barSegLodge = document.getElementById("bar-seg-lodge");
+  const barSegLift = document.getElementById("bar-seg-lift");
+  const barSegRental = document.getElementById("bar-seg-rental");
+  const barSegTrans = document.getElementById("bar-seg-trans");
+  const barSegFood = document.getElementById("bar-seg-food");
+  const receiptBreakdownSummary = document.getElementById("receipt-breakdown-summary");
+
+  if (groupTotal > 0) {
+    const pctLodge = Math.round((lodgeTotal / groupTotal) * 100);
+    const pctLift = Math.round((liftTotal / groupTotal) * 100);
+    const pctRental = Math.round((rentalTotal / groupTotal) * 100);
+    const pctTrans = Math.round((transTotal / groupTotal) * 100);
+    const pctFood = Math.max(0, 100 - (pctLodge + pctLift + pctRental + pctTrans));
+
+    if (barSegLodge) barSegLodge.style.width = `${pctLodge}%`;
+    if (barSegLift) barSegLift.style.width = `${pctLift}%`;
+    if (barSegRental) barSegRental.style.width = `${pctRental}%`;
+    if (barSegTrans) barSegTrans.style.width = `${pctTrans}%`;
+    if (barSegFood) barSegFood.style.width = `${pctFood}%`;
+
+    if (receiptBreakdownSummary) {
+      receiptBreakdownSummary.textContent = `Lodging ${pctLodge}% • Lifts ${pctLift}% • Gear ${pctRental}% • Trans ${pctTrans}% • Food ${pctFood}%`;
+    }
+  }
+
+  // Update Line Items Table
+  // 1. Lodge
+  const itemLodgeSub = document.getElementById("receipt-item-lodge-sub");
+  const lodgeGroup = document.getElementById("receipt-lodge-group");
+  const lodgePax = document.getElementById("receipt-lodge-pax");
+  if (itemLodgeSub) itemLodgeSub.textContent = `${lodgeName} (5 Guests • 4 Nights)`;
+  if (lodgeGroup) lodgeGroup.textContent = formatCurrency(lodgeTotal, calcCurrency);
+  if (lodgePax) lodgePax.textContent = `${formatCurrency(Math.round(lodgeTotal / 5), calcCurrency)} /pax`;
+
+  // 2. Lifts
+  const itemLiftSub = document.getElementById("receipt-item-lift-sub");
+  const liftGroup = document.getElementById("receipt-lift-group");
+  const liftPax = document.getElementById("receipt-lift-pax");
+  const nightSkiText = hasNightSki ? " + Night Ski" : "";
+  if (itemLiftSub) itemLiftSub.textContent = `${liftDays}-Day Mountain Pass (${skiers} Skiers${nightSkiText})`;
+  if (liftGroup) liftGroup.textContent = formatCurrency(liftTotal, calcCurrency);
+  if (liftPax) liftPax.textContent = `${formatCurrency(Math.round(liftTotal / 5), calcCurrency)} /pax`;
+
+  // 3. Gear Rentals
+  const itemRentalSub = document.getElementById("receipt-item-rental-sub");
+  const rentalGroup = document.getElementById("receipt-rental-group");
+  const rentalPax = document.getElementById("receipt-rental-pax");
+  if (itemRentalSub) itemRentalSub.textContent = `${gearTierLabel} (${gearPax} Sets • ${wearPax} Outerwear • ${liftDays}d)`;
+  if (rentalGroup) rentalGroup.textContent = formatCurrency(rentalTotal, calcCurrency);
+  if (rentalPax) rentalPax.textContent = `${formatCurrency(Math.round(rentalTotal / 5), calcCurrency)} /pax`;
+
+  // 4. Transportation
+  const itemTransSub = document.getElementById("receipt-item-trans-sub");
+  const transGroup = document.getElementById("receipt-trans-group");
+  const transPax = document.getElementById("receipt-trans-pax");
+  if (itemTransSub) itemTransSub.textContent = transLabel;
+  if (transGroup) transGroup.textContent = formatCurrency(transTotal, calcCurrency);
+  if (transPax) transPax.textContent = `${formatCurrency(Math.round(transTotal / 5), calcCurrency)} /pax`;
+
+  // 5. Food & Onsens
+  const itemFoodSub = document.getElementById("receipt-item-food-sub");
+  const foodGroup = document.getElementById("receipt-food-group");
+  const foodPax = document.getElementById("receipt-food-pax");
+  if (itemFoodSub) itemFoodSub.textContent = `${foodLabel} (4d × 5p)`;
+  if (foodGroup) foodGroup.textContent = formatCurrency(foodTotal, calcCurrency);
+  if (foodPax) foodPax.textContent = `${formatCurrency(Math.round(foodTotal / 5), calcCurrency)} /pax`;
+}
+
+function copyChatSummary() {
+  const calcLodgeSelect = document.getElementById("calc-lodge-select");
+  const calcLiftDays = document.getElementById("calc-lift-days");
+  const calcSkiersCount = document.getElementById("calc-skiers-count");
+  const calcGearPax = document.getElementById("calc-gear-pax");
+  const calcWearPax = document.getElementById("calc-wear-pax");
+
+  const lodgeName = calcLodgeSelect && calcLodgeSelect.selectedIndex >= 0
+    ? calcLodgeSelect.options[calcLodgeSelect.selectedIndex].text
+    : "Nagano Alpine Ryokan";
+
+  const groupTotalStr = formatCurrency(cachedTripTotals.groupTotal, calcCurrency);
+  const paxTotalStr = formatCurrency(cachedTripTotals.totalPax, calcCurrency);
+  const altCurrency = calcCurrency === "JPY" ? "USD" : "JPY";
+  const altGroupTotalStr = formatCurrency(cachedTripTotals.groupTotal, altCurrency);
+  const altPaxTotalStr = formatCurrency(cachedTripTotals.totalPax, altCurrency);
+
+  const summary = `🎿 JAPAN POWDER TRIP 2026/2027 — TOTAL COST BREAKDOWN
+👥 Group: 5 Adults | 📅 Dec 29, 2026 – Jan 2, 2027 (4 Nights)
+🏨 Base: ${lodgeName}
+
+💰 GROUP TOTAL (5 Pax): ${groupTotalStr} (~${altGroupTotalStr})
+👤 PER PERSON SHARE:    ${paxTotalStr} (~${altPaxTotalStr})
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+🏨 1. Lodging (4 Nights):  ${formatCurrency(cachedTripTotals.lodgeCost, calcCurrency)} (~${formatCurrency(cachedTripTotals.lodgePerPax, calcCurrency)}/pax)
+🚡 2. Ski Lift Passes:     ${formatCurrency(cachedTripTotals.liftCost, calcCurrency)} (${calcLiftDays?.value || 4} Days • ${calcSkiersCount?.value || 5} Skiers)
+🎿 3. Gear & Outerwear:    ${formatCurrency(cachedTripTotals.gearCost, calcCurrency)} (${calcGearPax?.value || 5} Gear Sets • ${calcWearPax?.value || 0} Outerwear)
+🚅 4. Tokyo Transport:     ${formatCurrency(cachedTripTotals.transCost, calcCurrency)} (${cachedTripTotals.transLabel})
+🍱 5. Food, Drinks & Onsen: ${formatCurrency(cachedTripTotals.foodCost, calcCurrency)} (${cachedTripTotals.foodLabel})
+━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔗 Live Radar & Availability: https://japan-ski-radar.vercel.app`;
+
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(summary)
+      .then(showCopiedFeedback)
+      .catch(() => fallbackClipboardCopy(summary));
+  } else {
+    fallbackClipboardCopy(summary);
+  }
+}
+
+function fallbackClipboardCopy(text) {
+  const textArea = document.createElement("textarea");
+  textArea.value = text;
+  textArea.style.position = "fixed";
+  textArea.style.left = "-999999px";
+  textArea.style.top = "-999999px";
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  try {
+    document.execCommand("copy");
+    showCopiedFeedback();
+  } catch (err) {
+    console.error("Fallback copy failed:", err);
+  }
+  document.body.removeChild(textArea);
+}
+
+function showCopiedFeedback() {
+  const copyBtnText = document.getElementById("copy-btn-text");
+  const btn = document.getElementById("btn-copy-chat-summary");
+  if (!copyBtnText) return;
+
+  const originalText = copyBtnText.textContent;
+  copyBtnText.textContent = "✅ Copied to Clipboard! Ready for WhatsApp/Telegram";
+  if (btn) btn.style.background = "linear-gradient(135deg, #059669 0%, #047857 100%)";
+
+  setTimeout(() => {
+    copyBtnText.textContent = originalText;
+    if (btn) btn.style.background = "";
+  }, 2500);
+}
+
+// Expose globally for inline button handlers
+window.openTripCalculator = openTripCalculator;
+window.closeTripCalculator = closeTripCalculator;
