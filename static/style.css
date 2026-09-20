@@ -824,6 +824,574 @@ body {
 }
 
 /* ==========================================================================
+   Mountain Lifts & Rentals Features
+   ========================================================================== */
+.btn-mountain {
+  background: linear-gradient(135deg, #0ea5e9 0%, #6366f1 100%);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  box-shadow: 0 4px 15px rgba(14, 165, 233, 0.35);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+
+.btn-mountain:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45);
+}
+
+.btn-glow-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #38bdf8;
+  box-shadow: 0 0 8px #38bdf8;
+  animation: pulseGlow 2s infinite ease-in-out;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.4); opacity: 1; }
+}
+
+.modal-window-large {
+  max-width: 1000px;
+  width: 95vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-title-with-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.badge-accent {
+  background: rgba(56, 189, 248, 0.2);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.modal-subtitle {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.resort-tabs-bar {
+  display: flex;
+  gap: 8px;
+  padding: 12px 24px;
+  background: rgba(15, 23, 42, 0.6);
+  border-bottom: 1px solid var(--border-subtle);
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: thin;
+}
+
+.resort-tabs-bar::-webkit-scrollbar {
+  height: 4px;
+}
+
+.resort-tabs-bar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+}
+
+.resort-tab-btn {
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  padding: 8px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.resort-tab-btn:hover {
+  background: rgba(56, 189, 248, 0.15);
+  color: var(--text-main);
+  border-color: rgba(56, 189, 248, 0.3);
+}
+
+.resort-tab-btn.active {
+  background: linear-gradient(135deg, rgba(14, 165, 233, 0.25) 0%, rgba(99, 102, 241, 0.25) 100%);
+  color: #38bdf8;
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
+}
+
+.modal-body-scroll {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Mountain Overview Header */
+.mountain-hero {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 20px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.mountain-hero-title h3 {
+  font-family: var(--font-heading);
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+
+.mountain-hero-ja {
+  font-size: 0.95rem;
+  color: var(--accent-cyan);
+  margin-bottom: 6px;
+}
+
+.mountain-hero-region {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.mountain-hero-badges {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.powder-tag {
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  color: #c084fc;
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.elevation-tag {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* Mountain Specs Grid */
+.mountain-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.mountain-stat-box {
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  text-align: center;
+}
+
+.mountain-stat-box .stat-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.mountain-stat-box .stat-val {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-top: 4px;
+}
+
+.mountain-stat-box .stat-sub {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+/* Terrain Bar */
+.terrain-container {
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+}
+
+.terrain-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.terrain-bar-track {
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  display: flex;
+  background: #1e293b;
+}
+
+.terrain-seg-beg {
+  background: #10b981;
+}
+
+.terrain-seg-int {
+  background: #0284c7;
+}
+
+.terrain-seg-adv {
+  background: #ef4444;
+}
+
+.terrain-legend {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 5px;
+}
+
+/* Two-column Lift & Rental Grid */
+.lifts-rentals-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.guide-card {
+  background: rgba(19, 29, 49, 0.7);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.guide-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 10px;
+}
+
+.guide-card-header h4 {
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.lift-price-matrix {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lift-price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: rgba(30, 41, 59, 0.6);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+}
+
+.lift-price-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.lift-price-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #38bdf8;
+}
+
+.lift-perks-box {
+  background: rgba(2, 132, 199, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+}
+
+/* Rental Shop Items */
+.rental-shop-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.rental-shop-item {
+  background: rgba(30, 41, 59, 0.6);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+}
+
+.rental-shop-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 6px;
+}
+
+.rental-shop-name {
+  font-weight: 700;
+  color: #ffffff;
+  font-size: 0.92rem;
+}
+
+.rental-shop-base {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.rental-tel-btn {
+  font-size: 0.75rem;
+  color: #38bdf8;
+  text-decoration: none;
+  background: rgba(56, 189, 248, 0.15);
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.rental-price-tags {
+  display: flex;
+  gap: 8px;
+  margin: 8px 0;
+  flex-wrap: wrap;
+}
+
+.rental-price-tag {
+  font-size: 0.75rem;
+  background: rgba(15, 23, 42, 0.8);
+  padding: 3px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+}
+
+.rental-price-tag strong {
+  color: #ffffff;
+}
+
+.rental-features {
+  font-size: 0.75rem;
+  color: var(--color-success);
+  margin-top: 4px;
+}
+
+/* Calculator Section */
+.trip-calculator-box {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.9) 0%, rgba(30, 41, 59, 0.8) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: var(--radius-md);
+  padding: 20px 24px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+.calculator-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.calculator-header h4 {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.calculator-sub {
+  font-size: 0.8rem;
+  color: var(--accent-cyan);
+}
+
+.calc-options-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.calc-option-card {
+  background: rgba(19, 29, 49, 0.6);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.calc-option-card:hover {
+  border-color: var(--accent-cyan);
+}
+
+.calc-option-card.active {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+}
+
+.calc-option-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+
+.calc-option-rate {
+  font-size: 0.78rem;
+  color: var(--accent-cyan);
+}
+
+.calc-totals-display {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  background: rgba(15, 23, 42, 0.8);
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
+  border: 1px solid var(--border-subtle);
+}
+
+.calc-total-item {
+  text-align: center;
+}
+
+.calc-total-item.highlight-total {
+  border-left: 1px solid var(--border-subtle);
+  border-right: 1px solid var(--border-subtle);
+}
+
+.calc-total-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+.calc-total-value {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 4px 0;
+}
+
+.calc-total-value.color-cyan {
+  color: #38bdf8;
+}
+
+.calc-total-sub {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+/* Lodge Card Ski Lifts Preview */
+.card-mountain-preview {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px dashed rgba(56, 189, 248, 0.25);
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mountain-stat-pill {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 0.78rem;
+}
+
+.mountain-stat-pill .pill-icon {
+  font-size: 0.9rem;
+}
+
+.mountain-stat-pill .pill-title {
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+.mountain-stat-pill .pill-value {
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+.btn-resort-details {
+  background: transparent;
+  border: none;
+  color: #38bdf8;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-align: right;
+  cursor: pointer;
+  padding: 4px 0 0;
+  display: inline-block;
+  transition: color 0.2s;
+}
+
+.btn-resort-details:hover {
+  color: #7dd3fc;
+  text-decoration: underline;
+}
+
+/* ==========================================================================
    Responsive Adaptations
    ========================================================================== */
 @media (max-width: 900px) {

@@ -33,6 +33,500 @@ def get_stay_dates(checkin_str: str, checkout_str: str) -> List[str]:
         cur += timedelta(days=1)
     return dates
 
+RESORT_MOUNTAIN_DATA = {
+    "Nozawa Onsen": {
+        "id": "nozawa",
+        "name": "Nozawa Onsen Snow Resort",
+        "name_ja": "野沢温泉スキー場",
+        "region": "Northern Nagano (Shimotakai)",
+        "elevation": "565m – 1,650m (1,085m vertical drop)",
+        "vertical_drop": 1085,
+        "lifts_summary": "2 High-speed Gondolas (Nagasaka 10-person & Hikage), 16 Lifts",
+        "total_lifts": 18,
+        "total_gondolas": 2,
+        "courses_count": 44,
+        "longest_run": "10,000m (Yamabiko Peak to Karasawa base)",
+        "powder_rating": "⭐⭐⭐⭐⭐ Iconic Deep Japow",
+        "terrain": {"beginner": 40, "intermediate": 30, "advanced": 30},
+        "lift_passes": {
+            "one_day": "¥7,300",
+            "one_day_val": 7300,
+            "four_day": "¥26,000",
+            "four_day_val": 26000,
+            "group_5p_4d": "¥130,000",
+            "group_5p_4d_val": 130000,
+            "night_ski": "¥2,500 (Nagasaka slope)",
+            "pass_type": "IC Smart Keycard (¥500 refundable deposit)",
+            "highlights": "Includes Nagasaka 10-person gondola + Hikage gondola. Free Yu-road moving walkway from village center."
+        },
+        "rentals": [
+            {
+                "name": "Compass House",
+                "base": "Nagasaka Gondola Base (100m walk)",
+                "phone": "0269-67-0224",
+                "standard_day": "¥5,500",
+                "powder_day": "¥7,000",
+                "wear_day": "¥3,500",
+                "features": "Armada Official Test Center • Custom boot fitting • Powder fat skis"
+            },
+            {
+                "name": "Salomon Station Nozawa",
+                "base": "Hikage Base & Nagasaka Center",
+                "phone": "0269-85-3311",
+                "standard_day": "¥5,000",
+                "powder_day": "¥6,800",
+                "wear_day": "¥3,500",
+                "features": "Top Salomon ski & board line • Heated overnight boot drying lockers"
+            },
+            {
+                "name": "Mt'Dock Nozawa",
+                "base": "Hikage Information Center Base",
+                "phone": "0269-85-3536",
+                "standard_day": "¥5,000",
+                "powder_day": "¥6,500",
+                "wear_day": "¥3,200",
+                "features": "Fast track rental • Daily hot wax and tune-up service • English staff"
+            }
+        ]
+    },
+    "Hakuba Valley": {
+        "id": "hakuba",
+        "name": "Hakuba Valley (10 Interconnected Mountains)",
+        "name_ja": "白馬バレー (八方尾根・五竜・47・栂池・コルチナ)",
+        "region": "Northern Alps, Nagano",
+        "elevation": "Happo: 760m – 1,831m (1,071m vertical drop)",
+        "vertical_drop": 1071,
+        "lifts_summary": "5 Gondolas, 90+ Chairlifts across 10 linked mountains",
+        "total_lifts": 95,
+        "total_gondolas": 5,
+        "courses_count": 137,
+        "longest_run": "8,000m (Happo Riesen / Skyline or Tsugaike)",
+        "powder_rating": "⭐⭐⭐⭐⭐ Olympic Alpine Terrain",
+        "terrain": {"beginner": 35, "intermediate": 40, "advanced": 25},
+        "lift_passes": {
+            "one_day": "¥9,200",
+            "one_day_val": 9200,
+            "four_day": "¥33,000",
+            "four_day_val": 33000,
+            "group_5p_4d": "¥165,000",
+            "group_5p_4d_val": 165000,
+            "night_ski": "¥3,200 (Goryu Toomi slope)",
+            "pass_type": "Hakuba Valley All-Mountain Pass (Valid across 10 resorts)",
+            "highlights": "Unlimited riding at Happo-one, Goryu, Hakuba47, Tsugaike, Cortina, Iwatake, Norikura, Kashimayari, Jigatake, Sanosaka + Free valley ski shuttle buses."
+        },
+        "rentals": [
+            {
+                "name": "Spicy Rentals Hakuba",
+                "base": "8 Stores across Valley (Happo, Wadano, Goryu, Echoland)",
+                "phone": "0261-72-2858",
+                "standard_day": "¥5,500",
+                "powder_day": "¥7,500",
+                "wear_day": "¥4,000",
+                "features": "Free gear swap between ski & snowboard • Valley-wide multi-shop dropoff"
+            },
+            {
+                "name": "Central Snowsports",
+                "base": "Happo Village, Wadano, Sakka Slopeside",
+                "phone": "0261-72-8850",
+                "standard_day": "¥5,500",
+                "powder_day": "¥7,500",
+                "wear_day": "¥4,000",
+                "features": "Free guest lodge shuttle service • Custom boot fitting • Free overnight storage"
+            },
+            {
+                "name": "Rhythm Japan Hakuba",
+                "base": "Happo Wadano (Hakuba Mominoki Hotel Base)",
+                "phone": "0261-72-3288",
+                "standard_day": "¥5,800",
+                "powder_day": "¥7,800",
+                "wear_day": "¥4,200",
+                "features": "Premier powder demos (K2, Black Crows, Jones, Burton) • Tuning workshop"
+            }
+        ]
+    },
+    "Madarao & Tangram": {
+        "id": "madarao",
+        "name": "Madarao Mountain Resort & Tangram Ski Circus",
+        "name_ja": "斑尾高原スキー場・タングラムスキーサーカス",
+        "region": "Northern Nagano (Iiyama / Shinano)",
+        "elevation": "910m – 1,350m (440m vertical drop)",
+        "vertical_drop": 440,
+        "lifts_summary": "15 Chairlifts across 2 interconnected resorts",
+        "total_lifts": 15,
+        "total_gondolas": 0,
+        "courses_count": 31,
+        "longest_run": "2,500m (Tangram Panorama Run)",
+        "powder_rating": "⭐⭐⭐⭐⭐ #1 Tree Run Capital (Madapow)",
+        "terrain": {"beginner": 30, "intermediate": 35, "advanced": 35},
+        "lift_passes": {
+            "one_day": "¥6,500",
+            "one_day_val": 6500,
+            "four_day": "¥23,000",
+            "four_day_val": 23000,
+            "group_5p_4d": "¥115,000",
+            "group_5p_4d_val": 115000,
+            "night_ski": "¥2,000 (Madarao Central slope)",
+            "pass_type": "Madarao + Tangram All-Mountain Dual Pass",
+            "highlights": "Grants complete access to 16 official gladed tree run bowls and all connecting lifts between Madarao and Tangram."
+        },
+        "rentals": [
+            {
+                "name": "Shirakaba Rental Shop",
+                "base": "Madarao Kogen Base Plaza",
+                "phone": "0269-64-3311",
+                "standard_day": "¥4,800",
+                "powder_day": "¥6,500",
+                "wear_day": "¥3,500",
+                "features": "Specialized powder fat skis • Snowshoes for backcountry • Family & group discounts"
+            },
+            {
+                "name": "Madarao Mountain Lounge Rental",
+                "base": "Main Mountain Lounge (Base Lift 1 & 2)",
+                "phone": "0269-64-3214",
+                "standard_day": "¥4,800",
+                "powder_day": "¥6,800",
+                "wear_day": "¥3,500",
+                "features": "Latest Burton & Head equipment • Overnight board tuning & wax"
+            },
+            {
+                "name": "Tangram Tokyu Pro Shop",
+                "base": "Hotel Tangram Base Ski Center",
+                "phone": "026-258-3511",
+                "standard_day": "¥4,800",
+                "powder_day": "¥6,500",
+                "wear_day": "¥3,500",
+                "features": "Direct indoor access to Tangram lifts • Heated lockers • Complete accessories"
+            }
+        ]
+    },
+    "Myoko Kogen": {
+        "id": "myoko",
+        "name": "Myoko Kogen (Suginohara, Akakura Kanko, Lotte Arai)",
+        "name_ja": "妙高高原 (杉ノ原・赤倉観光・ロッテアライ)",
+        "region": "Niigata / Nagano Border",
+        "elevation": "731m – 1,855m (1,124m vertical drop)",
+        "vertical_drop": 1124,
+        "lifts_summary": "10 Gondolas & Cable Cars, 35+ Lifts",
+        "total_lifts": 38,
+        "total_gondolas": 3,
+        "courses_count": 55,
+        "longest_run": "8,500m (Suginohara - Longest in Japan)",
+        "powder_rating": "⭐⭐⭐⭐⭐ Maritime Snowstorm Powder (13m+ snow)",
+        "terrain": {"beginner": 40, "intermediate": 35, "advanced": 25},
+        "lift_passes": {
+            "one_day": "¥6,000",
+            "one_day_val": 6000,
+            "four_day": "¥22,000",
+            "four_day_val": 22000,
+            "group_5p_4d": "¥110,000",
+            "group_5p_4d_val": 110000,
+            "night_ski": "¥2,500 (Akakura Onsen)",
+            "pass_type": "Resort Pass (Suginohara, Akakura, or Lotte Arai Freeride)",
+            "highlights": "Home to Suginohara's 8.5km continuous cruiser, Akakura's historic slopes, and Lotte Arai's vast off-piste freeride bowls."
+        },
+        "rentals": [
+            {
+                "name": "Myoko Snowsports",
+                "base": "Akakura Onsen Village (Main Street)",
+                "phone": "0255-87-2644",
+                "standard_day": "¥5,000",
+                "powder_day": "¥7,000",
+                "wear_day": "¥3,500",
+                "features": "100% English native staff • High-performance powder demo fleet • Helmet included"
+            },
+            {
+                "name": "Akakura Kanko Rental Center",
+                "base": "Akakura Sky Cable & Gondola Base",
+                "phone": "0255-87-2501",
+                "standard_day": "¥4,800",
+                "powder_day": "¥6,800",
+                "wear_day": "¥3,500",
+                "features": "Slopeside pickup • Quick return • High performance carving & powder boards"
+            },
+            {
+                "name": "Lotte Arai Mountain Station Rental",
+                "base": "Arai Resort Village Plaza",
+                "phone": "0255-75-1100",
+                "standard_day": "¥5,500",
+                "powder_day": "¥7,500",
+                "wear_day": "¥4,000",
+                "features": "Salomon & Atomic Pro Center • Avalanche safety gear rentals (beacons & shovels)"
+            }
+        ]
+    },
+    "Echigo-Yuzawa & Naeba": {
+        "id": "yuzawa",
+        "name": "Echigo-Yuzawa, Mt. Naeba & Kagura",
+        "name_ja": "越後湯沢・苗場・かぐら・GALA湯沢",
+        "region": "Niigata (70 mins from Tokyo via Joetsu Shinkansen)",
+        "elevation": "358m – 1,789m (1,225m vertical drop)",
+        "vertical_drop": 1225,
+        "lifts_summary": "6 Gondolas, 2 Ropeways (inc. 5.4km Dragondola), 45+ Lifts",
+        "total_lifts": 48,
+        "total_gondolas": 6,
+        "courses_count": 68,
+        "longest_run": "6,000m (Kagura Tashiro to Mitsumata)",
+        "powder_rating": "⭐⭐⭐⭐ Deep Yuzawa Snowpack & High Kagura Altitude",
+        "terrain": {"beginner": 35, "intermediate": 45, "advanced": 20},
+        "lift_passes": {
+            "one_day": "¥7,500",
+            "one_day_val": 7500,
+            "four_day": "¥27,000",
+            "four_day_val": 27000,
+            "group_5p_4d": "¥135,000",
+            "group_5p_4d_val": 135000,
+            "night_ski": "¥3,000 (Naeba South slope)",
+            "pass_type": "Mt. Naeba Joint Pass (Naeba + Kagura + Dragondola)",
+            "highlights": "Includes ride on the 5,481m Dragondola connecting Naeba and Kagura high-altitude powder bowls."
+        },
+        "rentals": [
+            {
+                "name": "Salomon Station Naeba",
+                "base": "Naeba Prince Hotel (Bldg 4 & 6)",
+                "phone": "025-789-2211",
+                "standard_day": "¥5,200",
+                "powder_day": "¥7,200",
+                "wear_day": "¥4,000",
+                "features": "Direct hotel ski room delivery • Salomon demo carving & powder sets"
+            },
+            {
+                "name": "GALA Yuzawa Rental Concourse",
+                "base": "GALA Shinkansen Station (2nd Floor)",
+                "phone": "025-785-6543",
+                "standard_day": "¥5,500",
+                "powder_day": "¥7,000",
+                "wear_day": "¥4,000",
+                "features": "Directly connected to bullet train platform • Change rooms & heated storage"
+            },
+            {
+                "name": "Boo Sports Yuzawa",
+                "base": "Echigo-Yuzawa Station West Exit",
+                "phone": "025-785-5558",
+                "standard_day": "¥4,500",
+                "powder_day": "¥6,500",
+                "wear_day": "¥3,200",
+                "features": "Free resort shuttle transport • Wide fleet of skis, snowboards, and step-on boots"
+            }
+        ]
+    },
+    "Shiga Kogen": {
+        "id": "shiga",
+        "name": "Shiga Kogen Mountain Resort (18 Connected Mountains)",
+        "name_ja": "志賀高原 (全18スキー場 共通リフト券)",
+        "region": "Joshin'etsu Kogen National Park, Nagano",
+        "elevation": "1,340m – 2,307m (967m vertical drop)",
+        "vertical_drop": 967,
+        "lifts_summary": "5 Gondolas, 48 Chairlifts across 18 interconnected mountains",
+        "total_lifts": 53,
+        "total_gondolas": 5,
+        "courses_count": 84,
+        "longest_run": "6,000m (Yakebitaiyama Olympic Course)",
+        "powder_rating": "⭐⭐⭐⭐⭐ Super Dry High Altitude Platinum Powder",
+        "terrain": {"beginner": 45, "intermediate": 35, "advanced": 20},
+        "lift_passes": {
+            "one_day": "¥8,000",
+            "one_day_val": 8000,
+            "four_day": "¥28,500",
+            "four_day_val": 28500,
+            "group_5p_4d": "¥142,500",
+            "group_5p_4d_val": 142500,
+            "night_ski": "¥2,600 (Ichinose Diamond & Yakebitaiyama)",
+            "pass_type": "Shiga Kogen All-Mountain Keycard (All 18 ski areas)",
+            "highlights": "Japan's largest linked ski resort. One pass covers Yakebitaiyama, Okushiga, Ichinose, Sunvalley, and Kumanoyu + free resort shuttle buses."
+        },
+        "rentals": [
+            {
+                "name": "Snowcan Network",
+                "base": "Hasuike, Ichinose Diamond, Sunvalley",
+                "phone": "0269-34-2626",
+                "standard_day": "¥5,000",
+                "powder_day": "¥7,000",
+                "wear_day": "¥3,500",
+                "features": "Multi-station exchange: swap or return gear at any Snowcan station across Shiga"
+            },
+            {
+                "name": "Yakebitaiyama Prince Hotel Rental",
+                "base": "Prince Hotel East, South & West Wings",
+                "phone": "0269-34-3111",
+                "standard_day": "¥5,200",
+                "powder_day": "¥7,200",
+                "wear_day": "¥3,800",
+                "features": "Ski-in / ski-out counter • Top Salomon test models • Overnight locker room"
+            },
+            {
+                "name": "Okushiga Sports Center",
+                "base": "Okushiga Kogen Center Base",
+                "phone": "0269-34-2225",
+                "standard_day": "¥5,000",
+                "powder_day": "¥6,800",
+                "wear_day": "¥3,500",
+                "features": "European ski school HQ • Powder snowboards and fat skis • Wax & edge tune"
+            }
+        ]
+    },
+    "Karuizawa & Sugadaira": {
+        "id": "karuizawa",
+        "name": "Karuizawa Prince & Sugadaira Kogen",
+        "name_ja": "軽井沢プリンスホテルスキー場・菅平高原",
+        "region": "Eastern Nagano (60 mins from Tokyo)",
+        "elevation": "Karuizawa: 940m – 1,155m | Sugadaira: 1,250m – 1,650m",
+        "vertical_drop": 400,
+        "lifts_summary": "Karuizawa: 9 Lifts | Sugadaira: 19 Lifts across Davos & Taro",
+        "total_lifts": 28,
+        "total_gondolas": 0,
+        "courses_count": 46,
+        "longest_run": "2,200m (Sugadaira Grand Davos Course)",
+        "powder_rating": "⭐⭐⭐ Crisp Bluebird Skies & Fast Groomers",
+        "terrain": {"beginner": 50, "intermediate": 35, "advanced": 15},
+        "lift_passes": {
+            "one_day": "¥6,500",
+            "one_day_val": 6500,
+            "four_day": "¥24,000",
+            "four_day_val": 24000,
+            "group_5p_4d": "¥120,000",
+            "group_5p_4d_val": 120000,
+            "night_ski": "¥2,500 (Karuizawa Prince)",
+            "pass_type": "Karuizawa Prince IC Pass or Sugadaira All-Area Pass",
+            "highlights": "60 minutes from Tokyo via Hokuriku Shinkansen. 90% sunny weather, high-speed carving groomers, and outlet shopping."
+        },
+        "rentals": [
+            {
+                "name": "Karuizawa Prince Ski Center Rental",
+                "base": "Karuizawa Prince Ski Center (East & West)",
+                "phone": "0267-42-5588",
+                "standard_day": "¥5,000",
+                "powder_day": "¥6,500",
+                "wear_day": "¥3,500",
+                "features": "Directly next to Prince cottages • Atomic & Salomon fleet • Step-on bindings"
+            },
+            {
+                "name": "Davos Alpine Rental Sugadaira",
+                "base": "Davos Base Lodge, Sugadaira",
+                "phone": "0268-74-2138",
+                "standard_day": "¥4,800",
+                "powder_day": "¥6,200",
+                "wear_day": "¥3,200",
+                "features": "Carving race skis • Snowboard rental packages • Heated changing room"
+            }
+        ]
+    },
+    "Kusatsu & Manza Onsen": {
+        "id": "kusatsu",
+        "name": "Kusatsu Onsen Ski Resort & Manza Onsen",
+        "name_ja": "草津温泉スキー場・万座温泉スキー場",
+        "region": "Gunma / Nagano Mountain Pass",
+        "elevation": "1,245m – 1,800m (555m vertical drop)",
+        "vertical_drop": 555,
+        "lifts_summary": "1 Pulse Gondola, 8 Lifts across Kusatsu Tenguyama & Manza",
+        "total_lifts": 9,
+        "total_gondolas": 1,
+        "courses_count": 14,
+        "longest_run": "4,300m (Kusatsu Riesen Course)",
+        "powder_rating": "⭐⭐⭐⭐ Micro-climate Sulfur Onsen Powder (1,800m elevation)",
+        "terrain": {"beginner": 45, "intermediate": 40, "advanced": 15},
+        "lift_passes": {
+            "one_day": "¥5,500",
+            "one_day_val": 5500,
+            "four_day": "¥20,000",
+            "four_day_val": 20000,
+            "group_5p_4d": "¥100,000",
+            "group_5p_4d_val": 100000,
+            "night_ski": "¥2,300 (Kusatsu Tenguyama slope)",
+            "pass_type": "Kusatsu Onsen Ski Keycard / Manza Prince Lift Pass",
+            "highlights": "World-famous Yubatake thermal springs. Combine Japan's #1 ranked therapeutic hot springs with pristine high-altitude powder."
+        },
+        "rentals": [
+            {
+                "name": "Tenguyama Base Rental Center",
+                "base": "Kusatsu Tenguyama Main Rest House",
+                "phone": "0279-88-8111",
+                "standard_day": "¥4,500",
+                "powder_day": "¥6,200",
+                "wear_day": "¥3,200",
+                "features": "Modern ski & board equipment • Helmets and snowshoe hire • Village shuttle link"
+            },
+            {
+                "name": "Manza Prince Rental Corner",
+                "base": "Manza Prince Hotel Ski Entrance",
+                "phone": "0279-97-1111",
+                "standard_day": "¥4,600",
+                "powder_day": "¥6,500",
+                "wear_day": "¥3,200",
+                "features": "Slopeside pickup at 1,800m • Powder skis and snowboards • Outdoor onsen access"
+            }
+        ]
+    },
+    "Ryuoo & Togakushi": {
+        "id": "ryuoo",
+        "name": "Ryuoo Ski Park & Togakushi Ski Resort",
+        "name_ja": "竜王スキーパーク (SORA terrace)・戸隠スキー場",
+        "region": "Northern Nagano (Yamanouchi / Togakushi)",
+        "elevation": "850m – 1,930m (1,080m vertical drop)",
+        "vertical_drop": 1080,
+        "lifts_summary": "1 166-passenger Mega Ropeway (Sora Terrace), 14 Lifts",
+        "total_lifts": 15,
+        "total_gondolas": 1,
+        "courses_count": 33,
+        "longest_run": "6,000m (Ryuoo Valley Course)",
+        "powder_rating": "⭐⭐⭐⭐⭐ Legendary Kiotoshi 36° Powder Wall & Cloud Sea",
+        "terrain": {"beginner": 35, "intermediate": 35, "advanced": 30},
+        "lift_passes": {
+            "one_day": "¥5,500",
+            "one_day_val": 5500,
+            "four_day": "¥20,000",
+            "four_day_val": 20000,
+            "group_5p_4d": "¥100,000",
+            "group_5p_4d_val": 100000,
+            "night_ski": "¥2,200 (Ryuoo Valley course)",
+            "pass_type": "Ryuoo Lift Pass (includes 166-passenger Ropeway) / Togakushi Pass",
+            "highlights": "Includes unlimited rides on the 166-person Sora Terrace mega-ropeway to 1,770m terrace above the sea of clouds. Un-groomed Kiotoshi powder wall."
+        },
+        "rentals": [
+            {
+                "name": "Ryuoo Information Center Rental",
+                "base": "Valley Cable Base Center (1F)",
+                "phone": "0269-33-7131",
+                "standard_day": "¥4,500",
+                "powder_day": "¥6,500",
+                "wear_day": "¥3,000",
+                "features": "Burton Learn to Ride center • High performance powder boards • Large changing rooms"
+            },
+            {
+                "name": "Togakushi Mountain Rental",
+                "base": "Togakushi Chusha Ski Center",
+                "phone": "026-254-2106",
+                "standard_day": "¥4,500",
+                "powder_day": "¥6,200",
+                "wear_day": "¥3,000",
+                "features": "Head & Rossignol demo skis • Snowshoe rentals for cedar shrine forest trail"
+            }
+        ]
+    }
+}
+
+def get_resort_mountain_info(resort_name: str) -> Dict[str, Any]:
+    """Resolves resort mountain metadata, lift passes, and rental directory from resort name string."""
+    r_lower = resort_name.lower()
+    if "nozawa" in r_lower:
+        return RESORT_MOUNTAIN_DATA["Nozawa Onsen"]
+    elif "hakuba" in r_lower:
+        return RESORT_MOUNTAIN_DATA["Hakuba Valley"]
+    elif "madarao" in r_lower or "tangram" in r_lower:
+        return RESORT_MOUNTAIN_DATA["Madarao & Tangram"]
+    elif "myoko" in r_lower:
+        return RESORT_MOUNTAIN_DATA["Myoko Kogen"]
+    elif "yuzawa" in r_lower or "naeba" in r_lower:
+        return RESORT_MOUNTAIN_DATA["Echigo-Yuzawa & Naeba"]
+    elif "shiga" in r_lower:
+        return RESORT_MOUNTAIN_DATA["Shiga Kogen"]
+    elif "karuizawa" in r_lower or "sugadaira" in r_lower:
+        return RESORT_MOUNTAIN_DATA["Karuizawa & Sugadaira"]
+    elif "kusatsu" in r_lower or "manza" in r_lower:
+        return RESORT_MOUNTAIN_DATA["Kusatsu & Manza Onsen"]
+    elif "ryuoo" in r_lower or "togakushi" in r_lower:
+        return RESORT_MOUNTAIN_DATA["Ryuoo & Togakushi"]
+    return RESORT_MOUNTAIN_DATA["Nozawa Onsen"]
+
 class SkiResortScraper:
     def __init__(self, checkin: str = DEFAULT_CHECKIN, checkout: str = DEFAULT_CHECKOUT, adults: int = DEFAULT_ADULTS, rooms: int = DEFAULT_ROOMS):
         self.checkin = checkin
@@ -190,6 +684,8 @@ class SkiResortScraper:
         for fb in self._get_fallback_nozawa_lodges():
             if fb["id"] not in existing_ids:
                 lodges.append(fb)
+        for l in lodges:
+            self._enrich_lodge_with_mountain_data(l)
         return lodges
 
     def scrape_hakuba_valley(self) -> List[Dict[str, Any]]:
@@ -303,6 +799,8 @@ class SkiResortScraper:
         for fb in self._get_fallback_hakuba_lodges():
             if fb["id"] not in existing_ids:
                 lodges.append(fb)
+        for l in lodges:
+            self._enrich_lodge_with_mountain_data(l)
         return lodges
 
     def scrape_madarao_and_others(self) -> List[Dict[str, Any]]:
@@ -316,6 +814,8 @@ class SkiResortScraper:
         lodges.extend(self.scrape_karuizawa_sugadaira())
         lodges.extend(self.scrape_kusatsu_manza())
         lodges.extend(self.scrape_ryuoo_togakushi())
+        for l in lodges:
+            self._enrich_lodge_with_mountain_data(l)
         return lodges
 
     def scrape_madarao_tangram(self) -> List[Dict[str, Any]]:
@@ -1265,6 +1765,25 @@ class SkiResortScraper:
             }
         ]
 
+    def _enrich_lodge_with_mountain_data(self, lodge: Dict[str, Any]) -> Dict[str, Any]:
+        """Enriches lodge record with ski lift pass pricing and nearby rental shop metadata."""
+        info = get_resort_mountain_info(lodge.get("resort", ""))
+        lp = info["lift_passes"]
+        rentals = info.get("rentals", [])
+        r_shop = rentals[0]["name"] if rentals else "Resort Rental Base"
+        r_base = rentals[0]["base"] if rentals else "Main Station"
+        r_price = rentals[0]["standard_day"] if rentals else "¥5,000"
+        p_price = rentals[0]["powder_day"] if rentals else "¥7,000"
+
+        lodge["resort_id"] = info["id"]
+        lodge["lift_pass_est"] = f"1-Day: {lp['one_day']} | 4-Day: {lp['four_day']}"
+        lodge["lift_pass_1day"] = lp["one_day"]
+        lodge["lift_pass_4day"] = lp["four_day"]
+        lodge["lift_pass_5p_4d"] = lp["group_5p_4d"]
+        lodge["recommended_rental_shop"] = f"{r_shop} ({r_base})"
+        lodge["rental_daily_est"] = f"Standard {r_price}/d | Powder Demo {p_price}/d"
+        return lodge
+
     def run_all(self) -> List[Dict[str, Any]]:
         """Runs the complete scraping suite across all target ski regions."""
         all_lodges = []
@@ -1278,6 +1797,7 @@ class SkiResortScraper:
         for l in all_lodges:
             if l["id"] not in seen_ids:
                 seen_ids.add(l["id"])
+                self._enrich_lodge_with_mountain_data(l)
                 unique_lodges.append(l)
         all_lodges = unique_lodges
 
@@ -1299,6 +1819,9 @@ class SkiResortScraper:
 
     def export_to_csv(self, lodges: List[Dict[str, Any]], filepath: str = "lodges_availability.csv"):
         """Exports the scraped lodge dataset into a clean CSV file."""
+        for l in lodges:
+            if "lift_pass_est" not in l:
+                self._enrich_lodge_with_mountain_data(l)
         fieldnames = [
             "resort",
             "name",
@@ -1310,6 +1833,10 @@ class SkiResortScraper:
             "price_unit",
             "group_total_est",
             "meal_plan",
+            "lift_pass_est",
+            "lift_pass_4day",
+            "recommended_rental_shop",
+            "rental_daily_est",
             "total_nights_available",
             "phone",
             "lift_proximity",

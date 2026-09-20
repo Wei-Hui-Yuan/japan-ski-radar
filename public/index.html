@@ -27,6 +27,14 @@
       </div>
 
       <div class="nav-actions">
+        <button id="btn-open-resorts-modal" class="btn btn-mountain">
+          <span class="btn-glow-dot"></span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+            <path d="m8 3 4 8 5-5 5 15H2L8 3z" />
+          </svg>
+          <span>🎿 Mountain Lifts & Rentals</span>
+        </button>
+
         <button id="btn-export-csv" class="btn btn-secondary">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -224,6 +232,32 @@
         <div class="modal-footer">
           <button id="btn-cancel-modal" class="btn btn-secondary">Cancel</button>
           <button id="btn-start-scrape" class="btn btn-primary">Start Live Scan</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mountain Lifts & Ski Gear Rentals Modal -->
+    <div id="modal-resorts" class="modal-backdrop hidden">
+      <div class="modal-window modal-window-large">
+        <div class="modal-header">
+          <div>
+            <div class="modal-title-with-badge">
+              <h2>🎿 Mountain Lifts & Gear Rentals Guide</h2>
+              <span class="badge-accent">9 Alpine Regions</span>
+            </div>
+            <p class="modal-subtitle">Direct lift pass prices, gondola specs, and authentic rental shops for your 5-guest ski trip</p>
+          </div>
+          <button id="btn-close-resorts-modal" class="btn-icon">&times;</button>
+        </div>
+
+        <!-- Resort Navigation Tabs -->
+        <div class="resort-tabs-bar" id="resort-tabs-container">
+          <!-- Rendered dynamically by app.js -->
+        </div>
+
+        <!-- Resort Dynamic Details Container -->
+        <div class="modal-body-scroll" id="resort-detail-content">
+          <!-- Injected dynamically by app.js -->
         </div>
       </div>
     </div>

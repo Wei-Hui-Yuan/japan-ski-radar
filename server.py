@@ -15,7 +15,15 @@ from pydantic import BaseModel
 from typing import Optional, List
 import json
 
-from scraper_engine import SkiResortScraper, DEFAULT_CHECKIN, DEFAULT_CHECKOUT, DEFAULT_ADULTS, DEFAULT_ROOMS
+from scraper_engine import (
+    SkiResortScraper,
+    DEFAULT_CHECKIN,
+    DEFAULT_CHECKOUT,
+    DEFAULT_ADULTS,
+    DEFAULT_ROOMS,
+    RESORT_MOUNTAIN_DATA,
+    get_resort_mountain_info
+)
 
 app = FastAPI(title="Japan Ski Lodging Radar API")
 
@@ -73,10 +81,26 @@ def initialize_cache():
                             l["price_per_person_night"] = int(l.get("price_per_person_night", 0) or 0)
                         except:
                             l["price_per_person_night"] = 0
+                        # Ensure lift pass and rental fields are populated
+                        if not l.get("lift_pass_est") or not l.get("recommended_rental_shop"):
+                            info = get_resort_mountain_info(l.get("resort", ""))
+                            lp = info["lift_passes"]
+                            rentals = info.get("rentals", [])
+                            r_shop = rentals[0]["name"] if rentals else "Resort Rental Base"
+                            r_base = rentals[0]["base"] if rentals else "Main Station"
+                            r_price = rentals[0]["standard_day"] if rentals else "¥5,000"
+                            p_price = rentals[0]["powder_day"] if rentals else "¥7,000"
+                            l["resort_id"] = info["id"]
+                            l["lift_pass_est"] = f"1-Day: {lp['one_day']} | 4-Day: {lp['four_day']}"
+                            l["lift_pass_1day"] = lp["one_day"]
+                            l["lift_pass_4day"] = lp["four_day"]
+                            l["lift_pass_5p_4d"] = lp["group_5p_4d"]
+                            l["recommended_rental_shop"] = f"{r_shop} ({r_base})"
+                            l["rental_daily_est"] = f"Standard {r_price}/d | Powder Demo {p_price}/d"
                     cached_data["lodges"] = lodges
                     from datetime import datetime
                     cached_data["last_scraped_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    print(f"[Cache] Loaded {len(lodges)} lodges with pricing from CSV.")
+                    print(f"[Cache] Loaded {len(lodges)} lodges with pricing and lift/rental info from CSV.")
                     return
         except Exception as e:
             print(f"[Cache] Error loading existing CSV: {e}")
@@ -93,6 +117,16 @@ class ScrapeRequest(BaseModel):
     checkout: Optional[str] = DEFAULT_CHECKOUT
     adults: Optional[int] = DEFAULT_ADULTS
     rooms: Optional[int] = DEFAULT_ROOMS
+
+@app.get("/api/resorts")
+@app.get("/resorts")
+def get_resorts():
+    """Returns comprehensive mountain lift pass rates, trail specs, and rental shop directories for all 9 ski regions."""
+    return {
+        "status": "success",
+        "total": len(RESORT_MOUNTAIN_DATA),
+        "data": RESORT_MOUNTAIN_DATA
+    }
 
 @app.get("/api/debug")
 @app.get("/debug")
@@ -197,8 +231,10 @@ def export_csv():
     output = io.StringIO()
     fieldnames = [
         "resort", "name", "name_en", "status", "status_code", "price_per_person_night",
-        "price_display", "price_unit", "group_total_est", "meal_plan", "total_nights_available",
-        "phone", "lift_proximity", "room_recommendation", "area", "address", "direct_link", "notes"
+        "price_display", "price_unit", "group_total_est", "meal_plan",
+        "lift_pass_est", "lift_pass_4day", "recommended_rental_shop", "rental_daily_est",
+        "total_nights_available", "phone", "lift_proximity", "room_recommendation",
+        "area", "address", "direct_link", "notes"
     ]
     writer = csv.DictWriter(output, fieldnames=fieldnames, extrasaction="ignore")
     writer.writeheader()

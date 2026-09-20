@@ -71,6 +71,8 @@ class TestSkiScraper(unittest.TestCase):
             self.assertIn("resort", rows[0])
             self.assertIn("name", rows[0])
             self.assertIn("direct_link", rows[0])
+            self.assertIn("lift_pass_est", rows[0])
+            self.assertIn("recommended_rental_shop", rows[0])
 
         if os.path.exists(test_csv_path):
             os.remove(test_csv_path)
@@ -78,6 +80,20 @@ class TestSkiScraper(unittest.TestCase):
 class TestServerAPI(unittest.TestCase):
     def setUp(self):
         self.client = TestClient(app)
+
+    def test_get_resorts_endpoint(self):
+        """Verify GET /api/resorts returns comprehensive mountain lifts and rentals data."""
+        res = self.client.get("/api/resorts")
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertEqual(data["status"], "success")
+        self.assertGreaterEqual(data["total"], 9)
+        self.assertIn("Nozawa Onsen", data["data"])
+        self.assertIn("Hakuba Valley", data["data"])
+        nozawa = data["data"]["Nozawa Onsen"]
+        self.assertIn("lift_passes", nozawa)
+        self.assertIn("rentals", nozawa)
+        self.assertGreaterEqual(len(nozawa["rentals"]), 2)
 
     def test_get_lodges_endpoint(self):
         """Verify GET /api/lodges endpoint."""
@@ -89,6 +105,10 @@ class TestServerAPI(unittest.TestCase):
         self.assertEqual(data["checkin"], "2026-12-29")
         self.assertEqual(data["checkout"], "2027-01-02")
         self.assertEqual(data["adults"], 5)
+        # Verify first lodge has lift pass and rental info
+        first = data["data"][0]
+        self.assertIn("lift_pass_est", first)
+        self.assertIn("recommended_rental_shop", first)
 
     def test_get_lodges_filtering(self):
         """Verify resort filtering on /api/lodges."""
@@ -114,6 +134,8 @@ class TestServerAPI(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(res.headers.get("content-type"), "text/csv; charset=utf-8")
         self.assertIn("resort,name", res.text)
+        self.assertIn("lift_pass_est", res.text)
+        self.assertIn("recommended_rental_shop", res.text)
 
 if __name__ == "__main__":
     unittest.main()
