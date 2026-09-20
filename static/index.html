@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nagano Powder Radar | Ski Lodging Tracker</title>
+  <meta name="description" content="Live Japanese ski resort accommodation tracker for Nozawa Onsen, Hakuba Valley, and Madarao Kogen. Scrapes direct booking engines for 5-adult party availability over New Year.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Top Navigation / Header -->
+    <header class="navbar">
+      <div class="nav-brand">
+        <div class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="m8 3 4 8 5-5 5 15H2L8 3z" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">Nagano Powder Radar</h1>
+          <span class="brand-tagline">Direct Ski Accommodation Aggregator & Live Availability Engine</span>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <button id="btn-export-csv" class="btn btn-secondary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" y1="15" x2="12" y2="3" />
+          </svg>
+          Export to CSV
+        </button>
+
+        <button id="btn-run-scrape" class="btn btn-primary">
+          <svg id="scrape-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+          </svg>
+          <span id="scrape-btn-text">Run Live Scrape</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Trip Target Parameters Banner -->
+    <section class="trip-banner">
+      <div class="trip-banner-content">
+        <div class="trip-meta-item">
+          <span class="meta-label">TARGET DATES</span>
+          <span class="meta-val highlight-cyan" id="display-dates">Dec 29, 2026 ➔ Jan 2, 2027</span>
+          <span class="meta-sub">4 Peak Holiday Nights (Oshogatsu)</span>
+        </div>
+        <div class="trip-meta-divider"></div>
+        <div class="trip-meta-item">
+          <span class="meta-label">PARTY SIZE</span>
+          <span class="meta-val" id="display-guests">5 Adult Males</span>
+          <span class="meta-sub">Washitsu (Tatami futons) or 2 Rooms (3+2)</span>
+        </div>
+        <div class="trip-meta-divider"></div>
+        <div class="trip-meta-item">
+          <span class="meta-label">COVERED RESORTS</span>
+          <span class="meta-val">9 Alpine Hubs (Nagano & Border Regions)</span>
+          <span class="meta-sub">Nozawa • Hakuba • Myoko • Yuzawa • Shiga • Madarao • Karuizawa • Kusatsu • Ryuoo</span>
+        </div>
+        <div class="trip-meta-divider"></div>
+        <div class="trip-meta-item">
+          <span class="meta-label">LAST UPDATED</span>
+          <span class="meta-val" id="display-updated">Just now</span>
+          <span class="meta-sub">Live 489ban & DirectIn APIs</span>
+        </div>
+      </div>
+
+      <!-- Advisory Box -->
+      <div class="advisory-card">
+        <div class="advisory-icon">💡</div>
+        <div class="advisory-text">
+          <strong>Why places showed 0 vacancy on Booking.com:</strong> Japanese ryokans and ski hotels hold New Year inventory for staggered release. For example, <strong>Hotel Goryukan (Hakuba)</strong> currently locks bookings to 5+ nights; their <strong>3–4 night bookings officially unlock on October 1, 2026</strong>. In <strong>Nozawa Onsen</strong>, use the direct tourism concierge matching form below to access 200+ offline village minshukus.
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats Counter Bar -->
+    <section class="stats-grid">
+      <div class="stat-card" data-filter="all">
+        <div class="stat-header">
+          <span class="stat-title">Total Monitored Lodges</span>
+          <span class="stat-badge badge-neutral">Directory</span>
+        </div>
+        <div class="stat-number" id="stat-total">70+</div>
+        <span class="stat-desc">Direct Japanese ski accommodations</span>
+      </div>
+
+      <div class="stat-card active-stat" data-filter="AVAILABLE">
+        <div class="stat-header">
+          <span class="stat-title">Immediate Openings</span>
+          <span class="stat-badge badge-success">Bookable</span>
+        </div>
+        <div class="stat-number color-success" id="stat-available">20+</div>
+        <span class="stat-desc">Open for Dec 29 – Jan 2 stay</span>
+      </div>
+
+      <div class="stat-card" data-filter="UNLOCKING_OCT_1">
+        <div class="stat-header">
+          <span class="stat-title">Unlocking October 1</span>
+          <span class="stat-badge badge-purple">High Alert</span>
+        </div>
+        <div class="stat-number color-purple" id="stat-unlocking">1</div>
+        <span class="stat-desc">5-night rule relaxing to 3-4 nights</span>
+      </div>
+
+      <div class="stat-card" data-filter="PARTIAL">
+        <div class="stat-header">
+          <span class="stat-title">Partial Openings</span>
+          <span class="stat-badge badge-warning">Split Stay</span>
+        </div>
+        <div class="stat-number color-warning" id="stat-partial">3</div>
+        <span class="stat-desc">Dates open on Dec 29, 31, or Jan 1</span>
+      </div>
+
+      <div class="stat-card" data-filter="INQUIRY">
+        <div class="stat-header">
+          <span class="stat-title">Village Concierge</span>
+          <span class="stat-badge badge-cyan">Direct Form</span>
+        </div>
+        <div class="stat-number color-cyan" id="stat-inquiry">1</div>
+        <span class="stat-desc">Nozawa official manual matching</span>
+      </div>
+    </section>
+
+    <!-- Main Content & Filters -->
+    <main class="main-layout">
+      <!-- Toolbar: Search & Filter Chips -->
+      <div class="controls-toolbar">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <input type="text" id="input-search" placeholder="Search lodge name, area, or keywords...">
+          <button id="btn-clear-search" class="btn-icon hidden">&times;</button>
+        </div>
+
+        <div class="filter-group resort-filter-chips">
+          <span class="filter-label">Resort:</span>
+          <button class="filter-chip active" data-resort="all">All Resorts</button>
+          <button class="filter-chip" data-resort="Nozawa">Nozawa Onsen</button>
+          <button class="filter-chip" data-resort="Hakuba">Hakuba Valley</button>
+          <button class="filter-chip" data-resort="Myoko">Myoko Kogen</button>
+          <button class="filter-chip" data-resort="Yuzawa">Yuzawa & Naeba</button>
+          <button class="filter-chip" data-resort="Shiga">Shiga Kogen</button>
+          <button class="filter-chip" data-resort="Madarao">Madarao & Tangram</button>
+          <button class="filter-chip" data-resort="Karuizawa">Karuizawa</button>
+          <button class="filter-chip" data-resort="Kusatsu">Kusatsu & Manza</button>
+          <button class="filter-chip" data-resort="Ryuoo">Ryuoo & Togakushi</button>
+        </div>
+
+        <div class="filter-group">
+          <span class="filter-label">Status:</span>
+          <select id="select-status-filter" class="custom-select">
+            <option value="all">All Availability States</option>
+            <option value="AVAILABLE">Available for All Nights</option>
+            <option value="UNLOCKING_OCT_1">Unlocking Oct 1 (5-Night Rule)</option>
+            <option value="PARTIAL">Partially Open</option>
+            <option value="INQUIRY">Village Concierge Desk</option>
+            <option value="UNAVAILABLE">Not Released / Full</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <span class="filter-label">Sort:</span>
+          <select id="select-sort-filter" class="custom-select">
+            <option value="priority">Priority (Openings First)</option>
+            <option value="price_asc">Price: Low to High</option>
+            <option value="price_desc">Price: High to Low</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Lodges Cards Grid -->
+      <div id="lodges-grid" class="lodges-grid">
+        <!-- Rendered dynamically by app.js -->
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <p>Querying live 489ban & DirectIn reservation systems...</p>
+        </div>
+      </div>
+    </main>
+
+    <!-- Modal for Custom Scrape Settings -->
+    <div id="modal-scrape" class="modal-backdrop hidden">
+      <div class="modal-window">
+        <div class="modal-header">
+          <h2>Configure Live Scrape Parameters</h2>
+          <button id="btn-close-modal" class="btn-icon">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-col">
+              <label>Check-in Date</label>
+              <input type="date" id="scrape-checkin" value="2026-12-29">
+            </div>
+            <div class="form-col">
+              <label>Check-out Date</label>
+              <input type="date" id="scrape-checkout" value="2027-01-02">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-col">
+              <label>Adult Guests</label>
+              <input type="number" id="scrape-adults" value="5" min="1" max="15">
+            </div>
+            <div class="form-col">
+              <label>Room Allocation</label>
+              <select id="scrape-rooms">
+                <option value="1">1 Room (Large Japanese Tatami Futon Suite)</option>
+                <option value="2">2 Rooms (3 Adults + 2 Adults)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="btn-cancel-modal" class="btn btn-secondary">Cancel</button>
+          <button id="btn-start-scrape" class="btn btn-primary">Start Live Scan</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>Nagano Powder Radar &copy; 2026 • Real-time Japanese Ski Lodge Discovery Engine</p>
+      <p class="footer-sub">Covering Nozawa Onsen Tourism Bureau, Hakuba Village 489ban Network, and Dynatech DirectIn.</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
